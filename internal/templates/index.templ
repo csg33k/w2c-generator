@@ -2,7 +2,6 @@ package templates
 
 import "github.com/csg33k/w2c-generator/internal/domain"
 
-// Index is the home page: new submission form + list of existing submissions.
 templ Index(submissions []domain.Submission) {
 	@Base("W-2c EFW2C Generator · Tax Year 2021") {
 		@PageHeader()
@@ -12,37 +11,81 @@ templ Index(submissions []domain.Submission) {
 			<div class="card" style="padding:24px;">
 				<div class="section-header">New Submission</div>
 				<form hx-post="/submissions" hx-target="body" hx-push-url="true">
-					<div class="section-header" style="margin-top:0;">Employer Information</div>
-					<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-						<div style="grid-column:1/-1;">
+
+					<!-- Submitter / BSO Info -->
+					<div class="section-header">BSO Submitter Info
+						<span style="font-weight:400;font-size:0.6rem;color:var(--muted);margin-left:8px;">required by AccuWage</span>
+					</div>
+					<div style="display:grid;gap:10px;">
+						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+							<div>
+								<label class="field-label">BSO User ID * <span style="font-weight:400;">(8 chars)</span></label>
+								<input type="text" name="bso_uid" placeholder="ABC12345" required maxlength="8" class="mono"/>
+							</div>
+							<div>
+								<label class="field-label">Preparer Code</label>
+								<select name="preparer_code">
+									<option value="L" selected>L — Self-Prepared</option>
+									<option value="A">A — Accounting Firm</option>
+									<option value="S">S — Service Bureau</option>
+									<option value="P">P — Parent Company</option>
+									<option value="O">O — Other</option>
+								</select>
+							</div>
+						</div>
+						<div>
+							<label class="field-label">Contact Name * <span style="font-weight:400;">(letters, numbers, space, - . ')</span></label>
+							<input type="text" name="contact_name" placeholder="JANE SMITH" required maxlength="27"/>
+						</div>
+						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+							<div>
+								<label class="field-label">Contact Phone * <span style="font-weight:400;">(digits only)</span></label>
+								<input type="tel" name="contact_phone" placeholder="8005551234" required maxlength="15" class="mono"/>
+							</div>
+							<div>
+								<label class="field-label">Contact Email *</label>
+								<input type="email" name="contact_email" placeholder="jane@example.com" required maxlength="40"/>
+							</div>
+						</div>
+					</div>
+
+					<hr class="divider"/>
+
+					<!-- Employer Info -->
+					<div class="section-header">Employer Information</div>
+					<div style="display:grid;gap:10px;">
+						<div>
 							<label class="field-label">Employer EIN *</label>
 							<input type="text" name="ein" placeholder="12-3456789" required maxlength="10" class="mono"/>
 						</div>
-						<div style="grid-column:1/-1;">
+						<div>
 							<label class="field-label">Employer Name *</label>
-							<input type="text" name="employer_name" placeholder="ACME CORPORATION" required maxlength="39"/>
+							<input type="text" name="employer_name" placeholder="ACME CORPORATION" required maxlength="35"/>
 						</div>
-						<div style="grid-column:1/-1;">
+						<div>
 							<label class="field-label">Address Line 1</label>
-							<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="39"/>
+							<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="40"/>
 						</div>
-						<div style="grid-column:1/-1;">
+						<div>
 							<label class="field-label">Address Line 2</label>
-							<input type="text" name="addr2" placeholder="SUITE 400" maxlength="39"/>
+							<input type="text" name="addr2" placeholder="SUITE 400" maxlength="40"/>
 						</div>
-						<div style="grid-column:1/-1;">
-							<label class="field-label">City</label>
-							<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
-						</div>
-						<div>
-							<label class="field-label">State</label>
-							<input type="text" name="state" placeholder="IL" maxlength="2"/>
-						</div>
-						<div>
-							<label class="field-label">ZIP</label>
-							<input type="text" name="zip" placeholder="62701" maxlength="5"/>
+						<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;">
+							<div>
+								<label class="field-label">City</label>
+								<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
+							</div>
+							<div>
+								<label class="field-label">State</label>
+								<input type="text" name="state" placeholder="IL" maxlength="2" class="mono"/>
+							</div>
+							<div>
+								<label class="field-label">ZIP</label>
+								<input type="text" name="zip" placeholder="62701" maxlength="5" class="mono"/>
+							</div>
 						</div>
 					</div>
+
 					<hr class="divider"/>
 					<div>
 						<label class="field-label">Notes (internal)</label>
@@ -59,12 +102,10 @@ templ Index(submissions []domain.Submission) {
 				<div class="section-header">Existing Submissions</div>
 				@SubmissionList(submissions)
 			</div>
-
 		</div>
 	}
 }
 
-// SubmissionList is an HTMX-swappable fragment listing all submissions.
 templ SubmissionList(submissions []domain.Submission) {
 	if len(submissions) == 0 {
 		<div class="card" style="padding:20px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--muted);">

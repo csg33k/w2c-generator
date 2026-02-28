@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/csg33k/w2c-generator/internal/domain"
 	"github.com/csg33k/w2c-generator/internal/ports"
 	"github.com/csg33k/w2c-generator/internal/templates"
@@ -50,6 +51,13 @@ func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s := &domain.Submission{
+		Submitter: domain.SubmitterInfo{
+			BSOUID:       r.FormValue("bso_uid"),
+			ContactName:  r.FormValue("contact_name"),
+			ContactPhone: stripNonDigits(r.FormValue("contact_phone")),
+			ContactEmail: r.FormValue("contact_email"),
+			PreparerCode: r.FormValue("preparer_code"),
+		},
 		Employer: domain.EmployerRecord{
 			EIN:            stripDashes(r.FormValue("ein")),
 			Name:           r.FormValue("employer_name"),
@@ -202,9 +210,7 @@ func (h *Handler) generateFile(w http.ResponseWriter, r *http.Request) {
 }
 
 // render writes a templ component to the response.
-func render(w http.ResponseWriter, r *http.Request, c interface {
-	Render(context.Context, interface{ Write([]byte) (int, error) }) error
-}) {
+func render(w http.ResponseWriter, r *http.Request, c templ.Component) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := c.Render(r.Context(), w); err != nil {
 		http.Error(w, err.Error(), 500)
@@ -218,6 +224,27 @@ func pathID(r *http.Request, key string) (int64, error) {
 func stripDashes(s string) string {
 	return strings.ReplaceAll(s, "-", "")
 }
+
+func stripNonDigits(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		// Use rune literals like '0' and '9'
+		if r >= '0' && r <= '9' {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
+//func stripNonDigits(s string) string {
+//	var b strings.Builder
+//	for _, r := range s {
+//		if r >= "0"[0] && r <= "9"[0] {
+//			b.WriteRune(r)
+//		}
+//	}
+//	return b.String()
+//}
 
 func parseCents(s string) int64 {
 	s = strings.TrimSpace(s)

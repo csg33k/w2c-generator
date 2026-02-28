@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("failed to open database: %v", err)
 	}
 
-	gen := efw2c.New()
+	gen := efw2c.MustNew(2021)
 	h := handlers.New(repo, gen)
 
 	log.Printf("W-2c EFW2C Generator running on http://localhost:%s", port)

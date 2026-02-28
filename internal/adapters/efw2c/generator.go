@@ -7,38 +7,77 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/csg33k/w2c-generator/internal/adapters/efw2c/spec"
 	"github.com/csg33k/w2c-generator/internal/domain"
 )
 
-// Generator implements ports.EFW2CGenerator for the 2021 EFW2C format.
-// SSA Publication 42-007 EFW2C Tax Year 2021.
-type Generator struct{}
+type Generator struct {
+	year  int
+	yspec *spec.YearSpec
+}
 
-func New() *Generator { return &Generator{} }
-
-// Generate writes the full EFW2C submission file:
-//
-//	RCA  - Submitter Record
-//	RCE  - Employer Record
-//	RCW  - Employee Correction Record (one per employee)
-//	RCT  - Total Record
-//	RCF  - Final Record
-func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Writer) error {
-	lines := []string{}
-	lines = append(lines, g.buildRCA(s))
-	lines = append(lines, g.buildRCE(s))
-	var totalFedTax, totalSSWages, totalMedWages int64
-	for i := range s.Employees {
-		lines = append(lines, g.buildRCW(&s.Employees[i]))
-		totalFedTax += s.Employees[i].Amounts.CorrectFederalIncomeTax
-		totalSSWages += s.Employees[i].Amounts.CorrectSocialSecurityWages
-		totalMedWages += s.Employees[i].Amounts.CorrectMedicareWages
+func New(year int) (*Generator, error) {
+	if year == 0 {
+		year = spec.DefaultYear
 	}
-	lines = append(lines, g.buildRCT(s, totalFedTax, totalSSWages, totalMedWages))
-	lines = append(lines, g.buildRCF(len(s.Employees)))
+	yspec, exact := spec.ForYear(year)
+	if !exact {
+		return &Generator{year: year, yspec: yspec},
+			fmt.Errorf("no exact spec for TY%d; using TY%d layout as fallback", year, spec.DefaultYear)
+	}
+	return &Generator{year: year, yspec: yspec}, nil
+}
 
-	for _, l := range lines {
-		if _, err := fmt.Fprintln(w, l); err != nil {
+func MustNew(year int) *Generator {
+	yspec, _ := spec.ForYear(year)
+	return &Generator{year: year, yspec: yspec}
+}
+
+func (g *Generator) Year() int            { return g.year }
+func (g *Generator) Spec() *spec.YearSpec { return g.yspec }
+
+// Generate writes a complete EFW2C byte stream (no CR/LF between records).
+func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Writer) error {
+	records := []string{
+		g.buildRCA(s),
+		g.buildRCE(s),
+	}
+
+	var (
+		origWages, corrWages   int64
+		origFed, corrFed       int64
+		origSS, corrSS         int64
+		origSSTax, corrSSTax   int64
+		origMed, corrMed       int64
+		origMedTax, corrMedTax int64
+	)
+	for i := range s.Employees {
+		e := &s.Employees[i]
+		records = append(records, g.buildRCW(e))
+		origWages += e.Amounts.OriginalWagesTipsOther
+		corrWages += e.Amounts.CorrectWagesTipsOther
+		origFed += e.Amounts.OriginalFederalIncomeTax
+		corrFed += e.Amounts.CorrectFederalIncomeTax
+		origSS += e.Amounts.OriginalSocialSecurityWages
+		corrSS += e.Amounts.CorrectSocialSecurityWages
+		origSSTax += e.Amounts.OriginalSocialSecurityTax
+		corrSSTax += e.Amounts.CorrectSocialSecurityTax
+		origMed += e.Amounts.OriginalMedicareWages
+		corrMed += e.Amounts.CorrectMedicareWages
+		origMedTax += e.Amounts.OriginalMedicareTax
+		corrMedTax += e.Amounts.CorrectMedicareTax
+	}
+	records = append(records,
+		g.buildRCT(origWages, corrWages, origFed, corrFed, origSS, corrSS,
+			origSSTax, corrSSTax, origMed, corrMed, origMedTax, corrMedTax),
+		g.buildRCF(len(s.Employees)),
+	)
+
+	for _, r := range records {
+		if len(r) != spec.RecordLen {
+			return fmt.Errorf("record %q is %d bytes (want %d)", r[:3], len(r), spec.RecordLen)
+		}
+		if _, err := io.WriteString(w, r); err != nil {
 			return err
 		}
 	}
@@ -49,148 +88,171 @@ func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Wri
 // Record builders
 // ---------------------------------------------------------------------------
 
-// RCA – Submitter Record (positions 1-512)
 func (g *Generator) buildRCA(s *domain.Submission) string {
-	b := newBuf(512)
-	b.put(1, 3, "RCA")
-	b.put(4, 8, "2021")                     // Tax year
-	b.put(9, 9, "1")                        // Software vendor code placeholder
-	b.put(10, 18, clean(s.Employer.EIN, 9)) // Submitter EIN
-	b.put(19, 57, pad(s.Employer.Name, 39))
-	b.put(58, 96, pad(s.Employer.AddressLine1, 39))
-	b.put(97, 135, pad(s.Employer.City, 39))
-	b.put(136, 137, pad(s.Employer.State, 2))
-	b.put(138, 146, pad(s.Employer.ZIP+s.Employer.ZIPExtension, 9))
-	b.put(147, 149, "USA")
-	b.put(150, 512, spaces(363))
+	sub := s.Submitter
+
+	preparerCode := sub.PreparerCode
+	if preparerCode == "" {
+		preparerCode = "L"
+	}
+	resubIndicator := sub.ResubIndicator
+	if resubIndicator == "" {
+		resubIndicator = "0"
+	}
+
+	b := newBuf()
+	b.put("RecordIdentifier", g.yspec.RCA, "RCA")
+	b.put("SubmitterEIN", g.yspec.RCA, cleanDigits(s.Employer.EIN, 9))
+	b.put("BSOUID", g.yspec.RCA, padAlpha(sub.BSOUID, 8))
+	// SoftwareCode left blank — not a software vendor
+	b.put("CompanyName", g.yspec.RCA, padAlpha(s.Employer.Name, 35))
+	b.put("LocationAddress", g.yspec.RCA, padAlpha(s.Employer.AddressLine1, 40))
+	b.put("DeliveryAddress", g.yspec.RCA, padAlpha(s.Employer.AddressLine2, 40))
+	b.put("StateAbbrev", g.yspec.RCA, padAlpha(s.Employer.State, 2))
+	b.put("ZIPCode", g.yspec.RCA, padNumeric(s.Employer.ZIP, 5))
+	b.put("ZIPExtension", g.yspec.RCA, padNumeric(s.Employer.ZIPExtension, 4))
+	// ForeignStateProvince left blank (domestic address)
+	// CountryCode left blank (USA)
+	b.put("ContactName", g.yspec.RCA, padAlpha(sub.ContactName, 27))
+	b.put("ContactPhone", g.yspec.RCA, padNumeric(sub.ContactPhone, 15))
+	b.put("ContactEmail", g.yspec.RCA, padEmail(sub.ContactEmail, 40))
+	b.put("PreparerCode", g.yspec.RCA, preparerCode)
+	b.put("ResubIndicator", g.yspec.RCA, resubIndicator)
+	if sub.ResubWFID != "" {
+		b.put("ResubWFID", g.yspec.RCA, padAlpha(sub.ResubWFID, 9))
+	}
 	return b.String()
 }
 
-// RCE – Employer Record (positions 1-512)
 func (g *Generator) buildRCE(s *domain.Submission) string {
-	b := newBuf(512)
-	b.put(1, 3, "RCE")
-	b.put(4, 4, "1") // Tax year indicator (1 = current)
-	b.put(5, 13, clean(s.Employer.EIN, 9))
-	b.put(14, 14, s.Employer.AgentIndicator)
-	b.put(15, 23, pad(s.Employer.AgentEIN, 9))
-	b.put(24, 24, boolChar(s.Employer.TerminatingBusiness))
-	b.put(25, 63, pad(s.Employer.Name, 39))
-	b.put(64, 102, pad(s.Employer.AddressLine1, 39))
-	b.put(103, 141, pad(s.Employer.AddressLine2, 39))
-	b.put(142, 180, pad(s.Employer.City, 39))
-	b.put(181, 182, pad(s.Employer.State, 2))
-	b.put(183, 187, pad(s.Employer.ZIP, 5))
-	b.put(188, 191, pad(s.Employer.ZIPExtension, 4))
-	b.put(192, 512, spaces(321))
+	b := newBuf()
+	b.put("RecordIdentifier", g.yspec.RCE, "RCE")
+	b.put("TaxYear", g.yspec.RCE, s.Employer.TaxYear)
+	b.put("EmployerEIN", g.yspec.RCE, cleanDigits(s.Employer.EIN, 9))
+	b.put("AgentForEIN", g.yspec.RCE, padNumeric(s.Employer.AgentEIN, 9))
+	b.put("AgentIndicatorCode", g.yspec.RCE, defaultStr(s.Employer.AgentIndicator, "0"))
+	b.put("TerminatingBusiness", g.yspec.RCE, boolChar(s.Employer.TerminatingBusiness))
+	b.put("EmploymentCode", g.yspec.RCE, "R")
+	b.put("EmployerName", g.yspec.RCE, padAlpha(s.Employer.Name, 35))
+	b.put("LocationAddress", g.yspec.RCE, padAlpha(s.Employer.AddressLine1, 40))
+	b.put("DeliveryAddress", g.yspec.RCE, padAlpha(s.Employer.AddressLine2, 40))
+	b.put("City", g.yspec.RCE, padAlpha(s.Employer.City, 39))
+	b.put("StateAbbrev", g.yspec.RCE, padAlpha(s.Employer.State, 2))
+	b.put("ZIPCode", g.yspec.RCE, padNumeric(s.Employer.ZIP, 5))
+	b.put("ZIPExtension", g.yspec.RCE, padNumeric(s.Employer.ZIPExtension, 4))
 	return b.String()
 }
 
-// RCW – Employee Correction Record
 func (g *Generator) buildRCW(e *domain.EmployeeRecord) string {
-	b := newBuf(512)
-	b.put(1, 3, "RCW")
-	b.put(4, 12, clean(e.SSN, 9))
-	b.put(13, 21, pad(clean(e.OriginalSSN, 9), 9))
-	b.put(22, 36, padLeft(e.LastName, 15))
-	b.put(37, 48, padLeft(e.FirstName, 12))
-	b.put(49, 49, firstChar(e.MiddleName))
-	b.put(50, 53, pad(e.Suffix, 4))
-	b.put(54, 92, pad(e.AddressLine1, 39))
-	b.put(93, 131, pad(e.AddressLine2, 39))
-	b.put(132, 170, pad(e.City, 39))
-	b.put(171, 172, pad(e.State, 2))
-	b.put(173, 177, pad(e.ZIP, 5))
-	b.put(178, 181, pad(e.ZIPExtension, 4))
-	b.put(182, 182, "U") // USA
-	// Box 1: Wages, tips
-	b.put(183, 194, money(e.Amounts.OriginalWagesTipsOther))
-	b.put(195, 206, money(e.Amounts.CorrectWagesTipsOther))
-	// Box 2: Federal income tax
-	b.put(207, 218, money(e.Amounts.OriginalFederalIncomeTax))
-	b.put(219, 230, money(e.Amounts.CorrectFederalIncomeTax))
-	// Box 3: SS wages
-	b.put(231, 242, money(e.Amounts.OriginalSocialSecurityWages))
-	b.put(243, 254, money(e.Amounts.CorrectSocialSecurityWages))
-	// Box 4: SS tax
-	b.put(255, 266, money(e.Amounts.OriginalSocialSecurityTax))
-	b.put(267, 278, money(e.Amounts.CorrectSocialSecurityTax))
-	// Box 5: Medicare wages
-	b.put(279, 290, money(e.Amounts.OriginalMedicareWages))
-	b.put(291, 302, money(e.Amounts.CorrectMedicareWages))
-	// Box 6: Medicare tax
-	b.put(303, 314, money(e.Amounts.OriginalMedicareTax))
-	b.put(315, 326, money(e.Amounts.CorrectMedicareTax))
-	b.put(327, 512, spaces(186))
+	b := newBuf()
+	b.put("RecordIdentifier", g.yspec.RCW, "RCW")
+	b.put("OrigSSN", g.yspec.RCW, cleanDigits(e.SSN, 9))
+	b.put("CorrectSSN", g.yspec.RCW, cleanDigits(e.OriginalSSN, 9))
+	b.put("OrigLastName", g.yspec.RCW, padAlpha(e.LastName, 15))
+	b.put("OrigFirstName", g.yspec.RCW, padAlpha(e.FirstName, 12))
+	b.put("OrigMiddleName", g.yspec.RCW, firstChar(e.MiddleName))
+	b.put("OrigSuffix", g.yspec.RCW, padAlpha(e.Suffix, 4))
+	b.put("LocationAddress", g.yspec.RCW, padAlpha(e.AddressLine1, 39))
+	b.put("DeliveryAddress", g.yspec.RCW, padAlpha(e.AddressLine2, 39))
+	b.put("City", g.yspec.RCW, padAlpha(e.City, 39))
+	b.put("StateAbbrev", g.yspec.RCW, padAlpha(e.State, 2))
+	b.put("ZIPCode", g.yspec.RCW, padNumeric(e.ZIP, 5))
+	b.put("ZIPExtension", g.yspec.RCW, padNumeric(e.ZIPExtension, 4))
+	b.put("OrigWagesTipsOther", g.yspec.RCW, money(e.Amounts.OriginalWagesTipsOther))
+	b.put("CorrectWagesTipsOther", g.yspec.RCW, money(e.Amounts.CorrectWagesTipsOther))
+	b.put("OrigFedIncomeTax", g.yspec.RCW, money(e.Amounts.OriginalFederalIncomeTax))
+	b.put("CorrectFedIncomeTax", g.yspec.RCW, money(e.Amounts.CorrectFederalIncomeTax))
+	b.put("OrigSSWages", g.yspec.RCW, money(e.Amounts.OriginalSocialSecurityWages))
+	b.put("CorrectSSWages", g.yspec.RCW, money(e.Amounts.CorrectSocialSecurityWages))
+	b.put("OrigSSTax", g.yspec.RCW, money(e.Amounts.OriginalSocialSecurityTax))
+	b.put("CorrectSSTax", g.yspec.RCW, money(e.Amounts.CorrectSocialSecurityTax))
+	b.put("OrigMedicareWages", g.yspec.RCW, money(e.Amounts.OriginalMedicareWages))
+	b.put("CorrectMedicareWages", g.yspec.RCW, money(e.Amounts.CorrectMedicareWages))
+	b.put("OrigMedicareTax", g.yspec.RCW, money(e.Amounts.OriginalMedicareTax))
+	b.put("CorrectMedicareTax", g.yspec.RCW, money(e.Amounts.CorrectMedicareTax))
 	return b.String()
 }
 
-// RCT – Total Record
-func (g *Generator) buildRCT(s *domain.Submission, fedTax, ssWages, medWages int64) string {
-	b := newBuf(512)
-	b.put(1, 3, "RCT")
-	b.put(4, 15, money(fedTax))
-	b.put(16, 27, money(ssWages))
-	b.put(28, 39, money(medWages))
-	b.put(40, 512, spaces(473))
+func (g *Generator) buildRCT(
+	origWages, corrWages,
+	origFed, corrFed,
+	origSS, corrSS,
+	origSSTax, corrSSTax,
+	origMed, corrMed,
+	origMedTax, corrMedTax int64,
+) string {
+	b := newBuf()
+	b.put("RecordIdentifier", g.yspec.RCT, "RCT")
+	b.put("OrigTotalWagesTips", g.yspec.RCT, money(origWages))
+	b.put("CorrectTotalWagesTips", g.yspec.RCT, money(corrWages))
+	b.put("OrigTotalFedIncomeTax", g.yspec.RCT, money(origFed))
+	b.put("CorrectTotalFedIncomeTax", g.yspec.RCT, money(corrFed))
+	b.put("OrigTotalSSWages", g.yspec.RCT, money(origSS))
+	b.put("CorrectTotalSSWages", g.yspec.RCT, money(corrSS))
+	b.put("OrigTotalSSTax", g.yspec.RCT, money(origSSTax))
+	b.put("CorrectTotalSSTax", g.yspec.RCT, money(corrSSTax))
+	b.put("OrigTotalMedicareWages", g.yspec.RCT, money(origMed))
+	b.put("CorrectTotalMedicareWages", g.yspec.RCT, money(corrMed))
+	b.put("OrigTotalMedicareTax", g.yspec.RCT, money(origMedTax))
+	b.put("CorrectTotalMedicareTax", g.yspec.RCT, money(corrMedTax))
 	return b.String()
 }
 
-// RCF – Final Record
-func (g *Generator) buildRCF(employeeCount int) string {
-	b := newBuf(512)
-	b.put(1, 3, "RCF")
-	b.put(4, 10, fmt.Sprintf("%07d", employeeCount))
-	b.put(11, 512, spaces(502))
+func (g *Generator) buildRCF(count int) string {
+	b := newBuf()
+	b.put("RecordIdentifier", g.yspec.RCF, "RCF")
+	b.put("TotalRCWRecords", g.yspec.RCF, fmt.Sprintf("%07d", count))
 	return b.String()
 }
 
 // ---------------------------------------------------------------------------
-// Buffer helpers
+// Buffer
 // ---------------------------------------------------------------------------
 
-type fixedBuf struct {
-	data []byte
-}
+type fixedBuf struct{ data []byte }
 
-func newBuf(size int) *fixedBuf {
-	d := make([]byte, size)
+func newBuf() *fixedBuf {
+	d := make([]byte, spec.RecordLen)
 	for i := range d {
 		d[i] = ' '
 	}
 	return &fixedBuf{data: d}
 }
 
-// put places s at 1-based positions [start, end] (inclusive), left-aligned.
-func (f *fixedBuf) put(start, end int, s string) {
-	width := end - start + 1
-	if len(s) > width {
-		s = s[:width]
+// put looks up fieldName in fields and writes value at the correct position.
+// Panics on unknown field name — that's a generator bug, not user error.
+func (b *fixedBuf) put(fieldName string, fields []spec.Field, value string) {
+	for _, f := range fields {
+		if f.Name == fieldName {
+			width := f.End - f.Start + 1
+			if len(value) > width {
+				value = value[:width]
+			}
+			copy(b.data[f.Start-1:f.End], []byte(value))
+			return
+		}
 	}
-	copy(f.data[start-1:end], []byte(s))
+	panic(fmt.Sprintf("efw2c: field %q not found in spec — generator bug", fieldName))
 }
 
-func (f *fixedBuf) String() string { return string(f.data) }
+func (b *fixedBuf) String() string { return string(b.data) }
 
 // ---------------------------------------------------------------------------
 // Formatting helpers
 // ---------------------------------------------------------------------------
 
-func pad(s string, n int) string {
-	s = strings.ToUpper(s)
-	if len(s) >= n {
+// padAlpha uppercases and left-pads with spaces to exactly n chars.
+func padAlpha(s string, n int) string {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	if len(s) > n {
 		return s[:n]
 	}
 	return s + strings.Repeat(" ", n-len(s))
 }
 
-func padLeft(s string, n int) string {
-	return pad(s, n)
-}
-
-func spaces(n int) string { return strings.Repeat(" ", n) }
-
-func clean(s string, n int) string {
+// padNumeric strips non-digits and left-pads with spaces to exactly n chars.
+// Per spec, numeric fields that are not populated should be all spaces.
+func padNumeric(s string, n int) string {
 	var b strings.Builder
 	for _, r := range s {
 		if unicode.IsDigit(r) {
@@ -198,13 +260,38 @@ func clean(s string, n int) string {
 		}
 	}
 	result := b.String()
-	if len(result) >= n {
+	if len(result) > n {
+		return result[:n]
+	}
+	return result + strings.Repeat(" ", n-len(result))
+}
+
+// padEmail preserves case for email addresses (spec allows mixed case).
+func padEmail(s string, n int) string {
+	s = strings.TrimSpace(s)
+	if len(s) > n {
+		return s[:n]
+	}
+	return s + strings.Repeat(" ", n-len(s))
+}
+
+// cleanDigits strips non-digits and zero-pads to exactly n digits.
+// Used for EIN and SSN fields which must be all digits.
+func cleanDigits(s string, n int) string {
+	var b strings.Builder
+	for _, r := range s {
+		if unicode.IsDigit(r) {
+			b.WriteRune(r)
+		}
+	}
+	result := b.String()
+	if len(result) > n {
 		return result[:n]
 	}
 	return result + strings.Repeat("0", n-len(result))
 }
 
-// money formats cents as a 12-char zero-padded string (no decimal).
+// money formats cents as a 12-char zero-padded integer (no decimal point).
 func money(cents int64) string {
 	if cents < 0 {
 		cents = 0
@@ -221,7 +308,14 @@ func boolChar(b bool) string {
 
 func firstChar(s string) string {
 	for _, r := range s {
-		return string(r)
+		return string(unicode.ToUpper(r))
 	}
 	return " "
+}
+
+func defaultStr(s, fallback string) string {
+	if s == "" {
+		return fallback
+	}
+	return s
 }
