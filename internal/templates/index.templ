@@ -1,0 +1,91 @@
+package templates
+
+import "github.com/csg33k/w2c-generator/internal/domain"
+
+// Index is the home page: new submission form + list of existing submissions.
+templ Index(submissions []domain.Submission) {
+	@Base("W-2c EFW2C Generator · Tax Year 2021") {
+		@PageHeader()
+		<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+
+			<!-- New Submission Form -->
+			<div class="card" style="padding:24px;">
+				<div class="section-header">New Submission</div>
+				<form hx-post="/submissions" hx-target="body" hx-push-url="true">
+					<div class="section-header" style="margin-top:0;">Employer Information</div>
+					<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+						<div style="grid-column:1/-1;">
+							<label class="field-label">Employer EIN *</label>
+							<input type="text" name="ein" placeholder="12-3456789" required maxlength="10" class="mono"/>
+						</div>
+						<div style="grid-column:1/-1;">
+							<label class="field-label">Employer Name *</label>
+							<input type="text" name="employer_name" placeholder="ACME CORPORATION" required maxlength="39"/>
+						</div>
+						<div style="grid-column:1/-1;">
+							<label class="field-label">Address Line 1</label>
+							<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="39"/>
+						</div>
+						<div style="grid-column:1/-1;">
+							<label class="field-label">Address Line 2</label>
+							<input type="text" name="addr2" placeholder="SUITE 400" maxlength="39"/>
+						</div>
+						<div style="grid-column:1/-1;">
+							<label class="field-label">City</label>
+							<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
+						</div>
+						<div>
+							<label class="field-label">State</label>
+							<input type="text" name="state" placeholder="IL" maxlength="2"/>
+						</div>
+						<div>
+							<label class="field-label">ZIP</label>
+							<input type="text" name="zip" placeholder="62701" maxlength="5"/>
+						</div>
+					</div>
+					<hr class="divider"/>
+					<div>
+						<label class="field-label">Notes (internal)</label>
+						<textarea name="notes" rows="2" style="resize:vertical;" placeholder="Optional internal notes..."></textarea>
+					</div>
+					<div style="margin-top:16px;display:flex;justify-content:flex-end;">
+						<button type="submit" class="btn btn-primary">CREATE SUBMISSION →</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- Existing Submissions -->
+			<div>
+				<div class="section-header">Existing Submissions</div>
+				@SubmissionList(submissions)
+			</div>
+
+		</div>
+	}
+}
+
+// SubmissionList is an HTMX-swappable fragment listing all submissions.
+templ SubmissionList(submissions []domain.Submission) {
+	if len(submissions) == 0 {
+		<div class="card" style="padding:20px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--muted);">
+			No submissions yet. Create one to get started.
+		</div>
+	} else {
+		for _, s := range submissions {
+			<div class="card" style="padding:14px 18px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+				<div>
+					<div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:0.9rem;">{ s.Employer.Name }</div>
+					<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">
+						EIN: { s.Employer.EIN } · { s.CreatedAt.Format("Jan 02, 2006") }
+					</div>
+					if s.Notes != "" {
+						<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;font-style:italic;">{ s.Notes }</div>
+					}
+				</div>
+				<a href={ templ.SafeURL("/submissions/" + itoa(s.ID)) } style="text-decoration:none;">
+					<button class="btn btn-primary" style="padding:6px 14px;font-size:0.7rem;">OPEN →</button>
+				</a>
+			</div>
+		}
+	}
+}

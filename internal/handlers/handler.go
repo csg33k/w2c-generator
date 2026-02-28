@@ -11,6 +11,7 @@ import (
 
 	"github.com/csg33k/w2c-generator/internal/domain"
 	"github.com/csg33k/w2c-generator/internal/ports"
+	"github.com/csg33k/w2c-generator/internal/templates"
 )
 
 type Handler struct {
@@ -25,7 +26,6 @@ func New(repo ports.SubmissionRepository, gen ports.EFW2CGenerator) *Handler {
 func (h *Handler) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", h.index)
-	mux.HandleFunc("GET /submissions", h.listSubmissions)
 	mux.HandleFunc("POST /submissions", h.createSubmission)
 	mux.HandleFunc("GET /submissions/{id}", h.viewSubmission)
 	mux.HandleFunc("DELETE /submissions/{id}", h.deleteSubmission)
@@ -41,16 +41,7 @@ func (h *Handler) index(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	renderIndex(w, submissions)
-}
-
-func (h *Handler) listSubmissions(w http.ResponseWriter, r *http.Request) {
-	submissions, err := h.repo.ListSubmissions(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	renderSubmissionList(w, submissions)
+	render(w, r, templates.Index(submissions))
 }
 
 func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +83,7 @@ func (h *Handler) viewSubmission(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	renderSubmissionDetail(w, s)
+	render(w, r, templates.Detail(s))
 }
 
 func (h *Handler) deleteSubmission(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +96,6 @@ func (h *Handler) deleteSubmission(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	// HTMX: redirect to home after delete
 	w.Header().Set("HX-Redirect", "/")
 	w.WriteHeader(http.StatusOK)
 }
@@ -152,13 +142,12 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	// Re-fetch and re-render employee list fragment
 	s, err := h.repo.GetSubmission(r.Context(), subID)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	renderEmployeeList(w, s)
+	render(w, r, templates.EmployeeList(s))
 }
 
 func (h *Handler) deleteEmployee(w http.ResponseWriter, r *http.Request) {
@@ -167,7 +156,6 @@ func (h *Handler) deleteEmployee(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid id", 400)
 		return
 	}
-	// Get submission id from query param for re-render
 	subIDStr := r.URL.Query().Get("sub")
 	subID, _ := strconv.ParseInt(subIDStr, 10, 64)
 
@@ -181,7 +169,7 @@ func (h *Handler) deleteEmployee(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		renderEmployeeList(w, s)
+		render(w, r, templates.EmployeeList(s))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -202,22 +190,26 @@ func (h *Handler) generateFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no employees in submission", 400)
 		return
 	}
-
 	var buf bytes.Buffer
 	if err := h.gen.Generate(context.Background(), s, &buf); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-
-	filename := fmt.Sprintf("W2C_%s_%s.txt", stripDashes(s.Employer.EIN), time.Now().Format("20060102"))
+	filename := fmt.Sprintf("W2C_%s_%s.txt", s.Employer.EIN, time.Now().Format("20060102"))
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	w.Write(buf.Bytes())
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+// render writes a templ component to the response.
+func render(w http.ResponseWriter, r *http.Request, c interface {
+	Render(context.Context, interface{ Write([]byte) (int, error) }) error
+}) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := c.Render(r.Context(), w); err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+}
 
 func pathID(r *http.Request, key string) (int64, error) {
 	return strconv.ParseInt(r.PathValue(key), 10, 64)
@@ -227,7 +219,6 @@ func stripDashes(s string) string {
 	return strings.ReplaceAll(s, "-", "")
 }
 
-// parseCents converts a dollar string like "1234.56" to cents (123456).
 func parseCents(s string) int64 {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -246,8 +237,4 @@ func parseCents(s string) int64 {
 		cents, _ = strconv.ParseInt(c, 10, 64)
 	}
 	return dollars*100 + cents
-}
-
-func centsToDisplay(cents int64) string {
-	return fmt.Sprintf("%.2f", float64(cents)/100)
 }

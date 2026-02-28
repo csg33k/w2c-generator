@@ -1,0 +1,146 @@
+package templates
+
+// Base wraps every page in the shared shell: fonts, CSS vars, header, footer.
+templ Base(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>{ title }</title>
+		<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+		<link rel="preconnect" href="https://fonts.googleapis.com"/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<style>
+			:root {
+				--ink: #0d1117;
+				--paper: #f5f0e8;
+				--ledger: #e8e0cc;
+				--accent: #c0392b;
+				--accent2: #2c6e49;
+				--muted: #6b5e4e;
+				--rule: #b8a898;
+			}
+			* { box-sizing: border-box; }
+			body {
+				background: var(--paper);
+				color: var(--ink);
+				font-family: 'IBM Plex Sans', sans-serif;
+				background-image: repeating-linear-gradient(
+					0deg, transparent, transparent 27px, var(--rule) 27px, var(--rule) 28px
+				);
+				min-height: 100vh;
+			}
+			.mono { font-family: 'IBM Plex Mono', monospace; }
+			.stamp {
+				display: inline-block;
+				border: 3px solid var(--accent);
+				color: var(--accent);
+				font-family: 'IBM Plex Mono', monospace;
+				font-weight: 600;
+				letter-spacing: 0.15em;
+				padding: 2px 10px;
+				transform: rotate(-2deg);
+				font-size: 0.7rem;
+			}
+			.card {
+				background: rgba(255,255,255,0.7);
+				border: 1px solid var(--ledger);
+				border-left: 4px solid var(--ink);
+			}
+			.field-label {
+				font-family: 'IBM Plex Mono', monospace;
+				font-size: 0.6rem;
+				font-weight: 600;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				color: var(--muted);
+				display: block;
+				margin-bottom: 2px;
+			}
+			input, select, textarea {
+				background: white;
+				border: 1px solid var(--rule);
+				border-bottom: 2px solid var(--ink);
+				padding: 6px 8px;
+				font-family: 'IBM Plex Mono', monospace;
+				font-size: 0.85rem;
+				width: 100%;
+				outline: none;
+				transition: border-color 0.15s;
+			}
+			input:focus, select:focus { border-bottom-color: var(--accent); }
+			.btn {
+				font-family: 'IBM Plex Mono', monospace;
+				font-weight: 600;
+				font-size: 0.8rem;
+				letter-spacing: 0.08em;
+				padding: 8px 18px;
+				border: 2px solid var(--ink);
+				cursor: pointer;
+				transition: all 0.15s;
+				text-transform: uppercase;
+			}
+			.btn-primary { background: var(--ink); color: white; }
+			.btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+			.btn-danger { background: white; color: var(--accent); border-color: var(--accent); }
+			.btn-danger:hover { background: var(--accent); color: white; }
+			.btn-success { background: var(--accent2); color: white; border-color: var(--accent2); }
+			.btn-success:hover { filter: brightness(1.1); }
+			.divider { border: none; border-top: 2px solid var(--ink); margin: 20px 0; }
+			.section-header {
+				font-family: 'IBM Plex Mono', monospace;
+				font-size: 0.7rem;
+				font-weight: 600;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				color: var(--muted);
+				border-bottom: 1px solid var(--rule);
+				padding-bottom: 4px;
+				margin-bottom: 16px;
+			}
+			.box-label {
+				font-family: 'IBM Plex Mono', monospace;
+				font-size: 0.6rem;
+				font-weight: 600;
+				color: var(--muted);
+				padding: 2px 4px;
+				background: var(--ledger);
+				display: inline-block;
+				margin-bottom: 3px;
+			}
+		</style>
+	</head>
+	<body>
+		<div style="max-width:1100px;margin:0 auto;padding:32px 24px;">
+			{ children... }
+			<div style="margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--muted);text-align:center;">
+				W-2c EFW2C GENERATOR · FOR INTERNAL USE · TAX YEAR 2021 ONLY
+			</div>
+		</div>
+	</body>
+	</html>
+}
+
+// PageHeader renders the IRS/SSA branding header used on every page.
+templ PageHeader() {
+	<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;">
+		<div>
+			<div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:4px;">
+				INTERNAL REVENUE SERVICE · SOCIAL SECURITY ADMINISTRATION
+			</div>
+			<h1 style="font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:600;letter-spacing:-0.02em;margin:0;">
+				W&#8209;2c Correction Generator
+			</h1>
+			<div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">
+				EFW2C Fixed-Width Submission Format · Tax Year <strong>2021</strong>
+			</div>
+		</div>
+		<div style="text-align:right;">
+			<div class="stamp">TY 2021</div>
+			<div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:8px;">SSA Pub. 42-007</div>
+		</div>
+	</div>
+}
