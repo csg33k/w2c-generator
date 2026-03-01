@@ -47,6 +47,11 @@ type EmployerRecord struct {
 	AgentIndicator      string
 	AgentEIN            string
 	TerminatingBusiness bool
+	EmploymentCode      string // A/H/M/Q/R/X/F — defaults to "R"
+	KindOfEmployer      string // F/S/T/Y/N
+	ContactName         string
+	ContactPhone        string
+	ContactEmail        string
 }
 
 type MonetaryAmounts struct {
@@ -62,6 +67,8 @@ type MonetaryAmounts struct {
 	CorrectSocialSecurityTax    int64
 	OriginalMedicareTax         int64
 	CorrectMedicareTax          int64
+	OriginalSocialSecurityTips  int64
+	CorrectSocialSecurityTips   int64
 }
 
 type EmployeeRecord struct {

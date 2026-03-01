@@ -2,20 +2,21 @@ package templates
 
 import "github.com/csg33k/w2c-generator/internal/domain"
 
+// Detail is the full submission page with the add-employee form and employee list.
 templ Detail(s *domain.Submission) {
 	@Base("W-2c · " + s.Employer.Name) {
+		<!-- Back nav -->
 		<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
 			<a href="/" style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--muted);text-decoration:none;">← ALL SUBMISSIONS</a>
 			<div class="stamp">TY 2021</div>
 		</div>
 
+		<!-- Submission header -->
 		<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
 			<div>
 				<h1 style="font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:600;margin:0;">{ s.Employer.Name }</h1>
 				<div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">
-					EIN: <span class="mono">{ s.Employer.EIN }</span>
-					· BSO: <span class="mono">{ s.Submitter.BSOUID }</span>
-					· { itoa(int64(len(s.Employees))) } correction(s)
+					EIN: <span class="mono">{ s.Employer.EIN }</span> · { itoa(int64(len(s.Employees))) } employee correction(s)
 				</div>
 			</div>
 			<div style="display:flex;gap:10px;">
@@ -33,10 +34,12 @@ templ Detail(s *domain.Submission) {
 			</div>
 		</div>
 
-		<div style="display:grid;grid-template-columns:420px 1fr;gap:28px;align-items:start;">
+		<div style="display:grid;grid-template-columns:400px 1fr;gap:28px;align-items:start;">
 
+			<!-- Add Employee Form -->
 			@AddEmployeeForm(s.ID)
 
+			<!-- Employee List -->
 			<div>
 				<div class="section-header">Employee Corrections ({ itoa(int64(len(s.Employees))) })</div>
 				<div id="employee-list">
@@ -48,6 +51,7 @@ templ Detail(s *domain.Submission) {
 	}
 }
 
+// AddEmployeeForm is the sidebar form for adding a new employee correction.
 templ AddEmployeeForm(submissionID int64) {
 	<div class="card" style="padding:22px;">
 		<div class="section-header">Add Employee Correction</div>
@@ -60,80 +64,86 @@ templ AddEmployeeForm(submissionID int64) {
 			<!-- Identity -->
 			<div class="section-header">Identity</div>
 			<div style="display:grid;gap:10px;">
+				<div>
+					<label class="field-label">Correct SSN *</label>
+					<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="mono"/>
+				</div>
+				<div>
+					<label class="field-label">Originally Reported SSN <span style="font-weight:400;">(if correcting SSN)</span></label>
+					<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="mono"/>
+				</div>
 				<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
 					<div>
-						<label class="field-label">Employee SSN * <span style="font-weight:400;">(correct)</span></label>
-						<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="mono"/>
+						<label class="field-label">First Name *</label>
+						<input type="text" name="first_name" required maxlength="12"/>
 					</div>
 					<div>
-						<label class="field-label">Originally Reported SSN</label>
-						<input type="text" name="original_ssn" placeholder="If correcting SSN" maxlength="11" class="mono"/>
+						<label class="field-label">Last Name *</label>
+						<input type="text" name="last_name" required maxlength="15"/>
 					</div>
 				</div>
-				<div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:8px;">
+				<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
 					<div>
-						<label class="field-label">First Name</label>
-						<input type="text" name="first_name" maxlength="12"/>
-					</div>
-					<div>
-						<label class="field-label">Last Name</label>
-						<input type="text" name="last_name" maxlength="15"/>
+						<label class="field-label">Middle Name</label>
+						<input type="text" name="middle_name" maxlength="15"/>
 					</div>
 					<div>
 						<label class="field-label">Suffix</label>
-						<input type="text" name="suffix" placeholder="JR" maxlength="4" class="mono"/>
+						<input type="text" name="suffix" placeholder="JR" maxlength="4"/>
 					</div>
-				</div>
-				<div>
-					<label class="field-label">Middle Initial</label>
-					<input type="text" name="middle_name" maxlength="1" style="width:48px;" class="mono"/>
 				</div>
 			</div>
 
-			<!-- Employee Address -->
 			<hr class="divider"/>
-			<div class="section-header">Employee Address <span style="font-weight:400;font-size:0.6rem;">(optional — included in RCW record)</span></div>
+
+			<!-- Address -->
+			<div class="section-header">Employee Address</div>
 			<div style="display:grid;gap:8px;">
 				<div>
 					<label class="field-label">Address Line 1</label>
-					<input type="text" name="emp_addr1" maxlength="39" placeholder="123 MAIN ST"/>
+					<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="39"/>
 				</div>
 				<div>
 					<label class="field-label">Address Line 2</label>
-					<input type="text" name="emp_addr2" maxlength="39" placeholder="APT 4B"/>
+					<input type="text" name="addr2" placeholder="APT 4B" maxlength="39"/>
 				</div>
 				<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;">
 					<div>
 						<label class="field-label">City</label>
-						<input type="text" name="emp_city" maxlength="39" placeholder="SPRINGFIELD"/>
+						<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
 					</div>
 					<div>
 						<label class="field-label">State</label>
-						<input type="text" name="emp_state" maxlength="2" placeholder="IL" class="mono"/>
+						<input type="text" name="state" placeholder="IL" maxlength="2" class="mono"/>
 					</div>
 					<div>
 						<label class="field-label">ZIP</label>
-						<input type="text" name="emp_zip" maxlength="5" placeholder="62701" class="mono"/>
+						<input type="text" name="zip" placeholder="62701" maxlength="5" class="mono"/>
 					</div>
 				</div>
 			</div>
 
-			<!-- Wages -->
 			<hr class="divider"/>
+
+
+
+			<!-- Wages & Compensation -->
 			<div class="section-header">Wages &amp; Compensation</div>
 			<div style="display:grid;gap:8px;">
-				@amountRow("BOX 1 ORIG", "Wages/Tips (orig)", "orig_wages",     "BOX 1 CORR", "Wages/Tips (corr)",     "corr_wages")
-				@amountRow("BOX 3 ORIG", "SS Wages (orig)",   "orig_ss_wages",  "BOX 3 CORR", "SS Wages (corr)",       "corr_ss_wages")
+				@amountRow("BOX 1 ORIG", "Wages/Tips (orig)", "orig_wages", "BOX 1 CORR", "Wages/Tips (corr)", "corr_wages")
+				@amountRow("BOX 3 ORIG", "SS Wages (orig)", "orig_ss_wages", "BOX 3 CORR", "SS Wages (corr)", "corr_ss_wages")
 				@amountRow("BOX 5 ORIG", "Medicare Wages (orig)", "orig_med_wages", "BOX 5 CORR", "Medicare Wages (corr)", "corr_med_wages")
+				@amountRow("BOX 7 ORIG", "SS Tips (orig)", "orig_ss_tips", "BOX 7 CORR", "SS Tips (corr)", "corr_ss_tips")
 			</div>
 
-			<!-- Tax withholdings -->
 			<hr class="divider"/>
+
+			<!-- Tax Withholdings -->
 			<div class="section-header">Tax Withholdings</div>
 			<div style="display:grid;gap:8px;">
-				@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax",  "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
-				@amountRow("BOX 4 ORIG", "SS Tax (orig)",         "orig_ss_tax",   "BOX 4 CORR", "SS Tax (corr)",          "corr_ss_tax")
-				@amountRow("BOX 6 ORIG", "Medicare Tax (orig)",   "orig_med_tax",  "BOX 6 CORR", "Medicare Tax (corr)",    "corr_med_tax")
+				@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
+				@amountRow("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", "BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax")
+				@amountRow("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", "BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax")
 			</div>
 
 			<div style="margin-top:16px;display:flex;justify-content:flex-end;">
@@ -143,6 +153,7 @@ templ AddEmployeeForm(submissionID int64) {
 	</div>
 }
 
+// amountRow renders an original/correct pair of monetary inputs side by side.
 templ amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName string) {
 	<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
 		<div>
@@ -158,6 +169,7 @@ templ amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName strin
 	</div>
 }
 
+// EmployeeList is the HTMX-swappable fragment showing all employee corrections.
 templ EmployeeList(s *domain.Submission) {
 	if len(s.Employees) == 0 {
 		<div class="card" style="padding:20px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--muted);">
@@ -171,10 +183,7 @@ templ EmployeeList(s *domain.Submission) {
 						<div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:1rem;">
 							{ e.LastName }, { e.FirstName }
 							if e.MiddleName != "" {
-								<span style="color:var(--muted);font-weight:400;"> { e.MiddleName }.</span>
-							}
-							if e.Suffix != "" {
-								<span style="color:var(--muted);font-weight:400;"> { e.Suffix }</span>
+								<span style="color:var(--muted);font-weight:400;"> { e.MiddleName }</span>
 							}
 						</div>
 						<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">
@@ -183,20 +192,11 @@ templ EmployeeList(s *domain.Submission) {
 								· Orig SSN: <span class="mono">{ e.OriginalSSN }</span>
 							}
 						</div>
-						if e.AddressLine1 != "" {
-							<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">
+						if e.City != "" || e.State != "" {
+							<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">
 								{ e.AddressLine1 }
-								if e.AddressLine2 != "" {
-									, { e.AddressLine2 }
-								}
 								if e.City != "" {
-									· { e.City }
-								}
-								if e.State != "" {
-									, { e.State }
-								}
-								if e.ZIP != "" {
-									{ e.ZIP }
+									· { e.City }, { e.State } { e.ZIP }
 								}
 							</div>
 						}
@@ -207,28 +207,38 @@ templ EmployeeList(s *domain.Submission) {
 						hx-delete={ "/employees/" + itoa(e.ID) + "?sub=" + itoa(s.ID) }
 						hx-target="#employee-list"
 						hx-swap="innerHTML"
-						hx-confirm="Remove this employee?"
+						hx-confirm="Remove this employee from the submission?"
 					>
 						REMOVE
 					</button>
 				</div>
-				<div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:0.75rem;">
-					@amountCell("BOX 1 — WAGES/TIPS",     e.Amounts.OriginalWagesTipsOther,      e.Amounts.CorrectWagesTipsOther)
-					@amountCell("BOX 2 — FED INCOME TAX", e.Amounts.OriginalFederalIncomeTax,    e.Amounts.CorrectFederalIncomeTax)
-					@amountCell("BOX 3 — SS WAGES",       e.Amounts.OriginalSocialSecurityWages, e.Amounts.CorrectSocialSecurityWages)
-					@amountCell("BOX 4 — SS TAX",         e.Amounts.OriginalSocialSecurityTax,   e.Amounts.CorrectSocialSecurityTax)
-					@amountCell("BOX 5 — MEDICARE WAGES", e.Amounts.OriginalMedicareWages,       e.Amounts.CorrectMedicareWages)
-					@amountCell("BOX 6 — MEDICARE TAX",   e.Amounts.OriginalMedicareTax,         e.Amounts.CorrectMedicareTax)
+				<div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:0.75rem;">
+					@amountCell("BOX 1 — WAGES/TIPS",     e.Amounts.OriginalWagesTipsOther,         e.Amounts.CorrectWagesTipsOther)
+					@amountCell("BOX 2 — FED TAX",        e.Amounts.OriginalFederalIncomeTax,        e.Amounts.CorrectFederalIncomeTax)
+					@amountCell("BOX 3 — SS WAGES",       e.Amounts.OriginalSocialSecurityWages,     e.Amounts.CorrectSocialSecurityWages)
+					@amountCell("BOX 4 — SS TAX",         e.Amounts.OriginalSocialSecurityTax,       e.Amounts.CorrectSocialSecurityTax)
+					@amountCell("BOX 5 — MED WAGES",      e.Amounts.OriginalMedicareWages,           e.Amounts.CorrectMedicareWages)
+					@amountCell("BOX 6 — MED TAX",        e.Amounts.OriginalMedicareTax,             e.Amounts.CorrectMedicareTax)
+					@amountCell("BOX 7 — SS TIPS",        e.Amounts.OriginalSocialSecurityTips,      e.Amounts.CorrectSocialSecurityTips)
 				</div>
 			</div>
 		}
 	}
 }
 
+// amountCell renders one box's original/correct pair in the employee card.
 templ amountCell(label string, orig, corr int64) {
-	<div style="background:var(--ledger);padding:8px;border-left:3px solid var(--ink);">
-		<div class="box-label">{ label }</div>
-		<div>Orig: <span class="mono">${ centsToDisplay(orig) }</span></div>
-		<div>Corr: <span class="mono" style="color:var(--accent2);font-weight:600;">${ centsToDisplay(corr) }</span></div>
+	<div style="background:var(--ledger);padding:8px;border-radius:4px;">
+		<div style="font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px;">{ label }</div>
+		<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+			<div>
+				<div style="font-size:0.6rem;color:var(--muted);">ORIG</div>
+				<div class="mono">{ centsToDisplay(orig) }</div>
+			</div>
+			<div>
+				<div style="font-size:0.6rem;color:var(--muted);">CORR</div>
+				<div class="mono" style="color:var(--accent);">{ centsToDisplay(corr) }</div>
+			</div>
+		</div>
 	</div>
 }

@@ -59,6 +59,11 @@ func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
 			PreparerCode: r.FormValue("preparer_code"),
 		},
 		Employer: domain.EmployerRecord{
+			EmploymentCode: r.FormValue("employment_code"),
+			KindOfEmployer: r.FormValue("kind_of_employer"),
+			ContactName:    r.FormValue("employer_contact_name"),
+			ContactPhone:   stripNonDigits(r.FormValue("employer_contact_phone")),
+			ContactEmail:   r.FormValue("employer_contact_email"),
 			EIN:            stripDashes(r.FormValue("ein")),
 			Name:           r.FormValue("employer_name"),
 			AddressLine1:   r.FormValue("emp_addr1"),
@@ -67,7 +72,7 @@ func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
 			State:          r.FormValue("emp_state"),
 			ZIP:            r.FormValue("emp_zip"),
 			ZIPExtension:   r.FormValue("emp_zip_ext"),
-			AgentIndicator: "0",
+			AgentIndicator: "0", // not exposed in UI yet
 			TaxYear:        domain.TaxYear2021,
 		},
 		Notes: r.FormValue("notes"),
@@ -132,6 +137,8 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 		ZIP:          r.FormValue("emp_zip"),
 		ZIPExtension: r.FormValue("emp_zip_ext"),
 		Amounts: domain.MonetaryAmounts{
+			OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
+			CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
 			OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
 			CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
 			OriginalSocialSecurityWages: parseCents(r.FormValue("orig_ss_wages")),

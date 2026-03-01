@@ -50,6 +50,7 @@ func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Wri
 		origSSTax, corrSSTax   int64
 		origMed, corrMed       int64
 		origMedTax, corrMedTax int64
+		origSSTips, corrSSTips int64
 	)
 	for i := range s.Employees {
 		e := &s.Employees[i]
@@ -66,10 +67,13 @@ func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Wri
 		corrMed += e.Amounts.CorrectMedicareWages
 		origMedTax += e.Amounts.OriginalMedicareTax
 		corrMedTax += e.Amounts.CorrectMedicareTax
+		origSSTips += e.Amounts.OriginalSocialSecurityTips
+		corrSSTips += e.Amounts.CorrectSocialSecurityTips
 	}
 	records = append(records,
 		g.buildRCT(origWages, corrWages, origFed, corrFed, origSS, corrSS,
-			origSSTax, corrSSTax, origMed, corrMed, origMedTax, corrMedTax),
+			origSSTax, corrSSTax, origMed, corrMed, origMedTax, corrMedTax,
+			origSSTips, corrSSTips),
 		g.buildRCF(len(s.Employees)),
 	)
 
@@ -108,6 +112,7 @@ func (g *Generator) buildRCA(s *domain.Submission) string {
 	b.put("CompanyName", g.yspec.RCA, padAlpha(s.Employer.Name, 35))
 	b.put("LocationAddress", g.yspec.RCA, padAlpha(s.Employer.AddressLine1, 40))
 	b.put("DeliveryAddress", g.yspec.RCA, padAlpha(s.Employer.AddressLine2, 40))
+	b.put("City", g.yspec.RCA, padAlpha(s.Employer.City, 22))
 	b.put("StateAbbrev", g.yspec.RCA, padAlpha(s.Employer.State, 2))
 	b.put("ZIPCode", g.yspec.RCA, padNumeric(s.Employer.ZIP, 5))
 	b.put("ZIPExtension", g.yspec.RCA, padNumeric(s.Employer.ZIPExtension, 4))
@@ -132,7 +137,9 @@ func (g *Generator) buildRCE(s *domain.Submission) string {
 	b.put("AgentForEIN", g.yspec.RCE, padNumeric(s.Employer.AgentEIN, 9))
 	b.put("AgentIndicatorCode", g.yspec.RCE, defaultStr(s.Employer.AgentIndicator, "0"))
 	b.put("TerminatingBusiness", g.yspec.RCE, boolChar(s.Employer.TerminatingBusiness))
-	b.put("EmploymentCode", g.yspec.RCE, "R")
+	//b.put("EmploymentCode", g.yspec.RCE, "R")
+	b.put("EmploymentCode", g.yspec.RCE, defaultStr(s.Employer.EmploymentCode, "R"))
+	b.put("KindOfEmployer", g.yspec.RCE, defaultStr(s.Employer.KindOfEmployer, "N"))
 	b.put("EmployerName", g.yspec.RCE, padAlpha(s.Employer.Name, 35))
 	b.put("LocationAddress", g.yspec.RCE, padAlpha(s.Employer.AddressLine1, 40))
 	b.put("DeliveryAddress", g.yspec.RCE, padAlpha(s.Employer.AddressLine2, 40))
@@ -140,6 +147,7 @@ func (g *Generator) buildRCE(s *domain.Submission) string {
 	b.put("StateAbbrev", g.yspec.RCE, padAlpha(s.Employer.State, 2))
 	b.put("ZIPCode", g.yspec.RCE, padNumeric(s.Employer.ZIP, 5))
 	b.put("ZIPExtension", g.yspec.RCE, padNumeric(s.Employer.ZIPExtension, 4))
+	b.put("EmployerPhone", g.yspec.RCE, padNumeric(s.Employer.ContactPhone, 15))
 	return b.String()
 }
 
@@ -170,6 +178,8 @@ func (g *Generator) buildRCW(e *domain.EmployeeRecord) string {
 	b.put("CorrectMedicareWages", g.yspec.RCW, money(e.Amounts.CorrectMedicareWages))
 	b.put("OrigMedicareTax", g.yspec.RCW, money(e.Amounts.OriginalMedicareTax))
 	b.put("CorrectMedicareTax", g.yspec.RCW, money(e.Amounts.CorrectMedicareTax))
+	b.put("OrigSSTips", g.yspec.RCW, money(e.Amounts.OriginalSocialSecurityTips))
+	b.put("CorrectSSTips", g.yspec.RCW, money(e.Amounts.CorrectSocialSecurityTips))
 	return b.String()
 }
 
@@ -179,7 +189,8 @@ func (g *Generator) buildRCT(
 	origSS, corrSS,
 	origSSTax, corrSSTax,
 	origMed, corrMed,
-	origMedTax, corrMedTax int64,
+	origMedTax, corrMedTax,
+	origSSTips, corrSSTips int64,
 ) string {
 	b := newBuf()
 	b.put("RecordIdentifier", g.yspec.RCT, "RCT")
@@ -195,13 +206,15 @@ func (g *Generator) buildRCT(
 	b.put("CorrectTotalMedicareWages", g.yspec.RCT, money(corrMed))
 	b.put("OrigTotalMedicareTax", g.yspec.RCT, money(origMedTax))
 	b.put("CorrectTotalMedicareTax", g.yspec.RCT, money(corrMedTax))
+	b.put("OrigTotalSSTips", g.yspec.RCT, money(origSSTips))
+	b.put("CorrectTotalSSTips", g.yspec.RCT, money(corrSSTips))
 	return b.String()
 }
 
 func (g *Generator) buildRCF(count int) string {
 	b := newBuf()
 	b.put("RecordIdentifier", g.yspec.RCF, "RCF")
-	b.put("TotalRCWRecords", g.yspec.RCF, fmt.Sprintf("%07d", count))
+	b.put("TotalRCWRecords", g.yspec.RCF, fmt.Sprintf("%09d", count))
 	return b.String()
 }
 

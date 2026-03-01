@@ -10,7 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/csg33k/w2c-generator/internal/domain"
 
-// Index is the home page: new submission form + list of existing submissions.
 func Index(submissions []domain.Submission) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -48,7 +47,7 @@ func Index(submissions []domain.Submission) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;\"><!-- New Submission Form --><div class=\"card\" style=\"padding:24px;\"><div class=\"section-header\">New Submission</div><form hx-post=\"/submissions\" hx-target=\"body\" hx-push-url=\"true\"><div class=\"section-header\" style=\"margin-top:0;\">Employer Information</div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:12px;\"><div style=\"grid-column:1/-1;\"><label class=\"field-label\">Employer EIN *</label> <input type=\"text\" name=\"ein\" placeholder=\"12-3456789\" required maxlength=\"10\" class=\"mono\"></div><div style=\"grid-column:1/-1;\"><label class=\"field-label\">Employer Name *</label> <input type=\"text\" name=\"employer_name\" placeholder=\"ACME CORPORATION\" required maxlength=\"39\"></div><div style=\"grid-column:1/-1;\"><label class=\"field-label\">Address Line 1</label> <input type=\"text\" name=\"addr1\" placeholder=\"123 MAIN ST\" maxlength=\"39\"></div><div style=\"grid-column:1/-1;\"><label class=\"field-label\">Address Line 2</label> <input type=\"text\" name=\"addr2\" placeholder=\"SUITE 400\" maxlength=\"39\"></div><div style=\"grid-column:1/-1;\"><label class=\"field-label\">City</label> <input type=\"text\" name=\"city\" placeholder=\"SPRINGFIELD\" maxlength=\"39\"></div><div><label class=\"field-label\">State</label> <input type=\"text\" name=\"state\" placeholder=\"IL\" maxlength=\"2\"></div><div><label class=\"field-label\">ZIP</label> <input type=\"text\" name=\"zip\" placeholder=\"62701\" maxlength=\"5\"></div></div><hr class=\"divider\"><div><label class=\"field-label\">Notes (internal)</label> <textarea name=\"notes\" rows=\"2\" style=\"resize:vertical;\" placeholder=\"Optional internal notes...\"></textarea></div><div style=\"margin-top:16px;display:flex;justify-content:flex-end;\"><button type=\"submit\" class=\"btn btn-primary\">CREATE SUBMISSION →</button></div></form></div><!-- Existing Submissions --><div><div class=\"section-header\">Existing Submissions</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;\"><!-- New Submission Form --><div class=\"card\" style=\"padding:24px;\"><div class=\"section-header\">New Submission</div><form hx-post=\"/submissions\" hx-target=\"body\" hx-push-url=\"true\"><!-- BSO Submitter Info --><div class=\"section-header\">BSO Submitter Info <span style=\"font-weight:400;font-size:0.6rem;color:var(--muted);margin-left:8px;\">required by AccuWage</span></div><div style=\"display:grid;gap:10px;\"><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:8px;\"><div><label class=\"field-label\">BSO User ID * <span style=\"font-weight:400;\">(8 chars)</span></label> <input type=\"text\" name=\"bso_uid\" placeholder=\"ABC12345\" required maxlength=\"8\" class=\"mono\"></div><div><label class=\"field-label\">Preparer Code</label> <select name=\"preparer_code\"><option value=\"L\" selected>L - Self-Prepared</option> <option value=\"A\">A - Accounting Firm</option> <option value=\"S\">S - Service Bureau</option> <option value=\"P\">P - Parent Company</option> <option value=\"O\">O - Other</option></select></div></div><div><label class=\"field-label\">Contact Name * <span style=\"font-weight:400;\">(letters, numbers, space, - . ')</span></label> <input type=\"text\" name=\"contact_name\" placeholder=\"JANE SMITH\" required maxlength=\"27\"></div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:8px;\"><div><label class=\"field-label\">Contact Phone * <span style=\"font-weight:400;\">(digits only)</span></label> <input type=\"tel\" name=\"contact_phone\" placeholder=\"8005551234\" required maxlength=\"15\" class=\"mono\"></div><div><label class=\"field-label\">Contact Email *</label> <input type=\"email\" name=\"contact_email\" placeholder=\"jane@example.com\" required maxlength=\"40\"></div></div></div><hr class=\"divider\"><!-- Employer Info --><div class=\"section-header\">Employer Information</div><div style=\"display:grid;gap:10px;\"><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:8px;\"><div><label class=\"field-label\">Employer EIN *</label> <input type=\"text\" name=\"ein\" placeholder=\"12-3456789\" required maxlength=\"10\" class=\"mono\"></div><div><label class=\"field-label\">Tax Year</label> <input type=\"text\" value=\"2021\" disabled class=\"mono\" style=\"background:var(--ledger);\"></div></div><div><label class=\"field-label\">Employer Name *</label> <input type=\"text\" name=\"employer_name\" placeholder=\"ACME CORPORATION\" required maxlength=\"35\"></div><div><label class=\"field-label\">Address Line 1</label> <input type=\"text\" name=\"addr1\" placeholder=\"123 MAIN ST\" maxlength=\"40\"></div><div><label class=\"field-label\">Address Line 2</label> <input type=\"text\" name=\"addr2\" placeholder=\"SUITE 400\" maxlength=\"40\"></div><div style=\"display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;\"><div><label class=\"field-label\">City</label> <input type=\"text\" name=\"city\" placeholder=\"SPRINGFIELD\" maxlength=\"39\"></div><div><label class=\"field-label\">State</label> <input type=\"text\" name=\"state\" placeholder=\"IL\" maxlength=\"2\" class=\"mono\"></div><div><label class=\"field-label\">ZIP</label> <input type=\"text\" name=\"zip\" placeholder=\"62701\" maxlength=\"5\" class=\"mono\"></div></div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:8px;\"><div><label class=\"field-label\">Employment Code *</label> <select name=\"employment_code\"><option value=\"R\" selected>R - Regular</option> <option value=\"A\">A - Agriculture</option> <option value=\"H\">H - Household</option> <option value=\"M\">M - Military</option> <option value=\"Q\">Q - Medicare Govt.</option> <option value=\"X\">X - Railroad</option> <option value=\"F\">F - 944 Filer</option></select></div><div><label class=\"field-label\">Kind of Employer *</label> <select name=\"kind_of_employer\"><option value=\"N\" selected>N - None Apply</option> <option value=\"F\">F - Federal Govt.</option> <option value=\"S\">S - State/Local 501c</option> <option value=\"T\">T - 501c Non-Govt.</option> <option value=\"Y\">Y - State/Local Non-501c</option></select></div></div></div><hr class=\"divider\"><!-- Employer Contact (RCE) --><div style=\"display:grid;gap:10px;\"><div><label class=\"field-label\">Employer Contact Name *</label> <input type=\"text\" name=\"employer_contact_name\" placeholder=\"JOHN DOE\" required maxlength=\"27\"></div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:8px;\"><div><label class=\"field-label\">Employer Contact Phone * <span style=\"font-weight:400;\">(digits only)</span></label> <input type=\"tel\" name=\"employer_contact_phone\" placeholder=\"8005551234\" required maxlength=\"15\" class=\"mono\"></div><div><label class=\"field-label\">Employer Contact Email *</label> <input type=\"email\" name=\"employer_contact_email\" placeholder=\"john@example.com\" required maxlength=\"40\"></div></div></div><hr class=\"divider\"><div><label class=\"field-label\">Notes (internal)</label> <textarea name=\"notes\" rows=\"2\" style=\"resize:vertical;\" placeholder=\"Optional internal notes...\"></textarea></div><div style=\"margin-top:16px;display:flex;justify-content:flex-end;\"><button type=\"submit\" class=\"btn btn-primary\">CREATE SUBMISSION →</button></div></form></div><!-- Existing Submissions --><div><div class=\"section-header\">Existing Submissions</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -70,7 +69,6 @@ func Index(submissions []domain.Submission) templ.Component {
 	})
 }
 
-// SubmissionList is an HTMX-swappable fragment listing all submissions.
 func SubmissionList(submissions []domain.Submission) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -99,82 +97,82 @@ func SubmissionList(submissions []domain.Submission) templ.Component {
 			}
 		} else {
 			for _, s := range submissions {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"card\" style=\"padding:14px 18px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;\"><div><div style=\"font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:0.9rem;\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"card\" style=\"padding:16px 20px;margin-bottom:10px;cursor:pointer;\" hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.Name)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("/submissions/" + itoa(s.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 77, Col: 107}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 169, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div style=\"font-size:0.75rem;color:var(--muted);margin-top:2px;\">EIN: ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-target=\"body\" hx-push-url=\"true\"><div style=\"font-family:'IBM Plex Mono',monospace;font-weight:600;\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.EIN)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 79, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 172, Col: 89}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " · ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div style=\"font-size:0.75rem;color:var(--muted);margin-top:4px;\">EIN: <span class=\"mono\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.CreatedAt.Format("Jan 02, 2006"))
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.EIN)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 79, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 174, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> · ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.CreatedAt.Format("2006-01-02"))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 174, Col: 92}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if s.Notes != "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div style=\"font-size:0.72rem;color:var(--muted);margin-top:2px;font-style:italic;\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div style=\"font-size:0.75rem;color:var(--muted);margin-top:4px;font-style:italic;\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.Notes)
+					var templ_7745c5c3_Var8 string
+					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(s.Notes)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 82, Col: 99}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 177, Col: 98}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div><a href=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var8 templ.SafeURL
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/submissions/" + itoa(s.ID)))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 85, Col: 57}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" style=\"text-decoration:none;\"><button class=\"btn btn-primary\" style=\"padding:6px 14px;font-size:0.7rem;\">OPEN →</button></a></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

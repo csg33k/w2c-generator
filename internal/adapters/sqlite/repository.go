@@ -31,14 +31,23 @@ func (r *Repository) CreateSubmission(ctx context.Context, s *domain.Submission)
 	res, err := r.db.ExecContext(ctx, `
 		INSERT INTO submissions (
 			ein, employer_name, addr1, addr2, city, state, zip, zip_ext,
-			agent_indicator, agent_ein, terminating, notes, created_at
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+			agent_indicator, agent_ein, terminating, notes,
+			bso_uid, contact_name, contact_phone, contact_email, preparer_code,
+			employment_code, kind_of_employer,
+			employer_contact_name, employer_contact_phone, employer_contact_email,
+			created_at
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		s.Employer.EIN, s.Employer.Name,
 		s.Employer.AddressLine1, s.Employer.AddressLine2,
 		s.Employer.City, s.Employer.State, s.Employer.ZIP, s.Employer.ZIPExtension,
 		s.Employer.AgentIndicator, s.Employer.AgentEIN,
 		boolToInt(s.Employer.TerminatingBusiness),
-		s.Notes, s.CreatedAt,
+		s.Notes,
+		s.Submitter.BSOUID, s.Submitter.ContactName,
+		s.Submitter.ContactPhone, s.Submitter.ContactEmail, s.Submitter.PreparerCode,
+		s.Employer.EmploymentCode, s.Employer.KindOfEmployer,
+		s.Employer.ContactName, s.Employer.ContactPhone, s.Employer.ContactEmail,
+		s.CreatedAt,
 	)
 	if err != nil {
 		return err
@@ -54,13 +63,22 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 	var submittedAt sql.NullTime
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, ein, employer_name, addr1, addr2, city, state, zip, zip_ext,
-		       agent_indicator, agent_ein, terminating, notes, created_at, submitted_at
+		       agent_indicator, agent_ein, terminating, notes,
+		       bso_uid, contact_name, contact_phone, contact_email, preparer_code,
+		       employment_code, kind_of_employer,
+		       employer_contact_name, employer_contact_phone, employer_contact_email,
+		       created_at, submitted_at
 		FROM submissions WHERE id=?`, id).Scan(
 		&s.ID, &s.Employer.EIN, &s.Employer.Name,
 		&s.Employer.AddressLine1, &s.Employer.AddressLine2,
 		&s.Employer.City, &s.Employer.State, &s.Employer.ZIP, &s.Employer.ZIPExtension,
 		&s.Employer.AgentIndicator, &s.Employer.AgentEIN,
-		&terminating, &s.Notes, &s.CreatedAt, &submittedAt,
+		&terminating, &s.Notes,
+		&s.Submitter.BSOUID, &s.Submitter.ContactName,
+		&s.Submitter.ContactPhone, &s.Submitter.ContactEmail, &s.Submitter.PreparerCode,
+		&s.Employer.EmploymentCode, &s.Employer.KindOfEmployer,
+		&s.Employer.ContactName, &s.Employer.ContactPhone, &s.Employer.ContactEmail,
+		&s.CreatedAt, &submittedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -81,6 +99,7 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 		       orig_fed_tax, corr_fed_tax,
 		       orig_ss_tax, corr_ss_tax,
 		       orig_med_tax, corr_med_tax,
+		       orig_ss_tips, corr_ss_tips,
 		       created_at, updated_at
 		FROM employees WHERE submission_id=? ORDER BY id`, id)
 	if err != nil {
@@ -99,6 +118,7 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 			&e.Amounts.OriginalFederalIncomeTax, &e.Amounts.CorrectFederalIncomeTax,
 			&e.Amounts.OriginalSocialSecurityTax, &e.Amounts.CorrectSocialSecurityTax,
 			&e.Amounts.OriginalMedicareTax, &e.Amounts.CorrectMedicareTax,
+			&e.Amounts.OriginalSocialSecurityTips, &e.Amounts.CorrectSocialSecurityTips,
 			&e.CreatedAt, &e.UpdatedAt,
 		); err != nil {
 			return nil, err
@@ -131,14 +151,22 @@ func (r *Repository) UpdateSubmission(ctx context.Context, s *domain.Submission)
 	_, err := r.db.ExecContext(ctx, `
 		UPDATE submissions
 		SET ein=?, employer_name=?, addr1=?, addr2=?, city=?, state=?, zip=?, zip_ext=?,
-		    agent_indicator=?, agent_ein=?, terminating=?, notes=?
+		    agent_indicator=?, agent_ein=?, terminating=?, notes=?,
+		    bso_uid=?, contact_name=?, contact_phone=?, contact_email=?, preparer_code=?,
+		    employment_code=?, kind_of_employer=?,
+		    employer_contact_name=?, employer_contact_phone=?, employer_contact_email=?
 		WHERE id=?`,
 		s.Employer.EIN, s.Employer.Name,
 		s.Employer.AddressLine1, s.Employer.AddressLine2,
 		s.Employer.City, s.Employer.State, s.Employer.ZIP, s.Employer.ZIPExtension,
 		s.Employer.AgentIndicator, s.Employer.AgentEIN,
 		boolToInt(s.Employer.TerminatingBusiness),
-		s.Notes, s.ID,
+		s.Notes,
+		s.Submitter.BSOUID, s.Submitter.ContactName,
+		s.Submitter.ContactPhone, s.Submitter.ContactEmail, s.Submitter.PreparerCode,
+		s.Employer.EmploymentCode, s.Employer.KindOfEmployer,
+		s.Employer.ContactName, s.Employer.ContactPhone, s.Employer.ContactEmail,
+		s.ID,
 	)
 	return err
 }
@@ -166,8 +194,9 @@ func (r *Repository) AddEmployee(ctx context.Context, submissionID int64, e *dom
 			orig_fed_tax, corr_fed_tax,
 			orig_ss_tax, corr_ss_tax,
 			orig_med_tax, corr_med_tax,
+			orig_ss_tips, corr_ss_tips,
 			created_at, updated_at
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		submissionID, e.SSN, e.OriginalSSN,
 		e.FirstName, e.MiddleName, e.LastName, e.Suffix,
 		e.AddressLine1, e.AddressLine2, e.City, e.State, e.ZIP, e.ZIPExtension,
@@ -177,6 +206,7 @@ func (r *Repository) AddEmployee(ctx context.Context, submissionID int64, e *dom
 		e.Amounts.OriginalFederalIncomeTax, e.Amounts.CorrectFederalIncomeTax,
 		e.Amounts.OriginalSocialSecurityTax, e.Amounts.CorrectSocialSecurityTax,
 		e.Amounts.OriginalMedicareTax, e.Amounts.CorrectMedicareTax,
+		e.Amounts.OriginalSocialSecurityTips, e.Amounts.CorrectSocialSecurityTips,
 		now, now,
 	)
 	if err != nil {
@@ -200,6 +230,7 @@ func (r *Repository) UpdateEmployee(ctx context.Context, e *domain.EmployeeRecor
 		    orig_fed_tax=?, corr_fed_tax=?,
 		    orig_ss_tax=?, corr_ss_tax=?,
 		    orig_med_tax=?, corr_med_tax=?,
+		    orig_ss_tips=?, corr_ss_tips=?,
 		    updated_at=?
 		WHERE id=?`,
 		e.SSN, e.OriginalSSN,
@@ -211,6 +242,7 @@ func (r *Repository) UpdateEmployee(ctx context.Context, e *domain.EmployeeRecor
 		e.Amounts.OriginalFederalIncomeTax, e.Amounts.CorrectFederalIncomeTax,
 		e.Amounts.OriginalSocialSecurityTax, e.Amounts.CorrectSocialSecurityTax,
 		e.Amounts.OriginalMedicareTax, e.Amounts.CorrectMedicareTax,
+		e.Amounts.OriginalSocialSecurityTips, e.Amounts.CorrectSocialSecurityTips,
 		e.UpdatedAt, e.ID,
 	)
 	return err
