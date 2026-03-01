@@ -2,8 +2,11 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 
 	"github.com/csg33k/w2c-generator/internal/adapters/efw2c"
 	sqliteadapter "github.com/csg33k/w2c-generator/internal/adapters/sqlite"
@@ -11,6 +14,10 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		slog.Warn("error loading .env file", "err", err)
+	}
 	dsn := os.Getenv("DB_PATH")
 	if dsn == "" {
 		dsn = "w2c.db"

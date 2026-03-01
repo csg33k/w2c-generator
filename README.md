@@ -42,6 +42,35 @@ w2c-generator/
 ```
 
 ## Prerequisites
+## Prerequisites
+```bash
++# dbmate (DB migrations)
++brew install dbmate          # macOS
++# or: go install github.com/amacneil/dbmate/v2@latest
++
+ # Go 1.22+
+ go version
+```
+```diff
++## Database Migrations
++
++```bash
++# Set the DB URL (defaults to file:w2c.db)
++export DATABASE_URL="sqlite:w2c.db"
++
++# Apply all pending migrations
++dbmate up
++
++# Roll back the latest migration
++dbmate down
++
++# Check migration status
++dbmate status
++```
++
++Migration files live in `db/migrations/`. Run `dbmate up` once before `mage dev`.
++
+```
 
 ```bash
 # Go 1.22+
