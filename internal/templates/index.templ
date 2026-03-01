@@ -5,26 +5,23 @@ import "github.com/csg33k/w2c-generator/internal/domain"
 templ Index(submissions []domain.Submission) {
 	@Base("W-2c EFW2C Generator · Tax Year 2021") {
 		@PageHeader()
-		<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+		<div class="grid grid-cols-2 gap-8 items-start">
 
 			<!-- New Submission Form -->
-			<div class="card" style="padding:24px;">
-				<div class="section-header">New Submission</div>
+			<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-6">
+				@SectionHeader("New Submission", "")
 				<form hx-post="/submissions" hx-target="body" hx-push-url="true">
 
 					<!-- BSO Submitter Info -->
-					<div class="section-header">
-						BSO Submitter Info
-						<span style="font-weight:400;font-size:0.6rem;color:var(--muted);margin-left:8px;">required by AccuWage</span>
-					</div>
-					<div style="display:grid;gap:10px;">
-						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+					@SectionHeader("BSO Submitter Info", "required by AccuWage")
+					<div class="grid gap-2.5">
+						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="field-label">BSO User ID * <span style="font-weight:400;">(8 chars)</span></label>
-								<input type="text" name="bso_uid" placeholder="ABC12345" required maxlength="8" class="mono"/>
+								@FieldLabel("BSO User ID *", "(8 chars)")
+								<input type="text" name="bso_uid" placeholder="ABC12345" required maxlength="8" class="font-mono"/>
 							</div>
 							<div>
-								<label class="field-label">Preparer Code</label>
+								@FieldLabel("Preparer Code", "")
 								<select name="preparer_code">
 									<option value="L" selected>L - Self-Prepared</option>
 									<option value="A">A - Accounting Firm</option>
@@ -35,65 +32,65 @@ templ Index(submissions []domain.Submission) {
 							</div>
 						</div>
 						<div>
-							<label class="field-label">Contact Name * <span style="font-weight:400;">(letters, numbers, space, - . ')</span></label>
+							@FieldLabel("Contact Name *", "(letters, numbers, space, - .)")
 							<input type="text" name="contact_name" placeholder="JANE SMITH" required maxlength="27"/>
 						</div>
-						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="field-label">Contact Phone * <span style="font-weight:400;">(digits only)</span></label>
-								<input type="tel" name="contact_phone" placeholder="8005551234" required maxlength="15" class="mono"/>
+								@FieldLabel("Contact Phone *", "(digits only)")
+								<input type="tel" name="contact_phone" placeholder="8005551234" required maxlength="15" class="font-mono"/>
 							</div>
 							<div>
-								<label class="field-label">Contact Email *</label>
+								@FieldLabel("Contact Email *", "")
 								<input type="email" name="contact_email" placeholder="jane@example.com" required maxlength="40"/>
 							</div>
 						</div>
 					</div>
 
-					<hr class="divider"/>
+					<hr class="border-0 border-t-2 border-ink my-5"/>
 
 					<!-- Employer Info -->
-					<div class="section-header">Employer Information</div>
-					<div style="display:grid;gap:10px;">
-						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+					@SectionHeader("Employer Information", "")
+					<div class="grid gap-2.5">
+						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="field-label">Employer EIN *</label>
-								<input type="text" name="ein" placeholder="12-3456789" required maxlength="10" class="mono"/>
+								@FieldLabel("Employer EIN *", "")
+								<input type="text" name="ein" placeholder="12-3456789" required maxlength="10" class="font-mono"/>
 							</div>
 							<div>
-								<label class="field-label">Tax Year</label>
-								<input type="text" value="2021" disabled class="mono" style="background:var(--ledger);"/>
+								@FieldLabel("Tax Year", "")
+								<input type="text" value="2021" disabled class="font-mono"/>
 							</div>
 						</div>
 						<div>
-							<label class="field-label">Employer Name *</label>
+							@FieldLabel("Employer Name *", "")
 							<input type="text" name="employer_name" placeholder="ACME CORPORATION" required maxlength="35"/>
 						</div>
 						<div>
-							<label class="field-label">Address Line 1</label>
+							@FieldLabel("Address Line 1", "")
 							<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="40"/>
 						</div>
 						<div>
-							<label class="field-label">Address Line 2</label>
+							@FieldLabel("Address Line 2", "")
 							<input type="text" name="addr2" placeholder="SUITE 400" maxlength="40"/>
 						</div>
-						<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;">
+						<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
 							<div>
-								<label class="field-label">City</label>
+								@FieldLabel("City", "")
 								<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
 							</div>
 							<div>
-								<label class="field-label">State</label>
-								<input type="text" name="state" placeholder="IL" maxlength="2" class="mono"/>
+								@FieldLabel("State", "")
+								<input type="text" name="state" placeholder="IL" maxlength="2" class="font-mono"/>
 							</div>
 							<div>
-								<label class="field-label">ZIP</label>
-								<input type="text" name="zip" placeholder="62701" maxlength="5" class="mono"/>
+								@FieldLabel("ZIP", "")
+								<input type="text" name="zip" placeholder="62701" maxlength="5" class="font-mono"/>
 							</div>
 						</div>
-						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="field-label">Employment Code *</label>
+								@FieldLabel("Employment Code *", "")
 								<select name="employment_code">
 									<option value="R" selected>R - Regular</option>
 									<option value="A">A - Agriculture</option>
@@ -105,7 +102,7 @@ templ Index(submissions []domain.Submission) {
 								</select>
 							</div>
 							<div>
-								<label class="field-label">Kind of Employer *</label>
+								@FieldLabel("Kind of Employer *", "")
 								<select name="kind_of_employer">
 									<option value="N" selected>N - None Apply</option>
 									<option value="F">F - Federal Govt.</option>
@@ -117,46 +114,43 @@ templ Index(submissions []domain.Submission) {
 						</div>
 					</div>
 
-					<hr class="divider"/>
+					<hr class="border-0 border-t-2 border-ink my-5"/>
 
 					<!-- Employer Contact (RCE) -->
-					<div class="section-header">
-                        Employer Contact
-                        <span style="font-weight:400;font-size:0.6rem;color:var(--muted);margin-left:8px;">
-                          RCE record
-                        </span>
-                    </div>
-					<div style="display:grid;gap:10px;">
+					@SectionHeader("Employer Contact", "RCE record")
+					<div class="grid gap-2.5">
 						<div>
-							<label class="field-label">Employer Contact Name *</label>
+							@FieldLabel("Employer Contact Name *", "")
 							<input type="text" name="employer_contact_name" placeholder="JOHN DOE" required maxlength="27"/>
 						</div>
-						<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+						<div class="grid grid-cols-2 gap-2">
 							<div>
-								<label class="field-label">Employer Contact Phone * <span style="font-weight:400;">(digits only)</span></label>
-								<input type="tel" name="employer_contact_phone" placeholder="8005551234" required maxlength="15" class="mono"/>
+								@FieldLabel("Employer Contact Phone *", "(digits only)")
+								<input type="tel" name="employer_contact_phone" placeholder="8005551234" required maxlength="15" class="font-mono"/>
 							</div>
 							<div>
-								<label class="field-label">Employer Contact Email *</label>
+								@FieldLabel("Employer Contact Email *", "")
 								<input type="email" name="employer_contact_email" placeholder="john@example.com" required maxlength="40"/>
 							</div>
 						</div>
 					</div>
 
-					<hr class="divider"/>
+					<hr class="border-0 border-t-2 border-ink my-5"/>
 					<div>
-						<label class="field-label">Notes (internal)</label>
-						<textarea name="notes" rows="2" style="resize:vertical;" placeholder="Optional internal notes..."></textarea>
+						@FieldLabel("Notes (internal)", "")
+						<textarea name="notes" rows="2" class="resize-y" placeholder="Optional internal notes..."></textarea>
 					</div>
-					<div style="margin-top:16px;display:flex;justify-content:flex-end;">
-						<button type="submit" class="btn btn-primary">CREATE SUBMISSION →</button>
+					<div class="mt-4 flex justify-end">
+						<button type="submit" class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent">
+							CREATE SUBMISSION →
+						</button>
 					</div>
 				</form>
 			</div>
 
 			<!-- Existing Submissions -->
 			<div>
-				<div class="section-header">Existing Submissions</div>
+				@SectionHeader("Existing Submissions", "")
 				@SubmissionList(submissions)
 			</div>
 		</div>
@@ -166,23 +160,45 @@ templ Index(submissions []domain.Submission) {
 
 templ SubmissionList(submissions []domain.Submission) {
 	if len(submissions) == 0 {
-		<div class="card" style="padding:20px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--muted);">
+		<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-5 text-center font-mono text-[0.8rem] text-muted">
 			No submissions yet. Create one to get started.
 		</div>
 	} else {
 		for _, s := range submissions {
-			<div class="card" style="padding:16px 20px;margin-bottom:10px;cursor:pointer;"
+			<div
+				class="bg-white/70 border border-ledger border-l-4 border-l-ink px-5 py-4 mb-2.5 cursor-pointer hover:border-l-accent transition-colors duration-150"
 				hx-get={ "/submissions/" + itoa(s.ID) }
 				hx-target="body"
-				hx-push-url="true">
-				<div style="font-family:'IBM Plex Mono',monospace;font-weight:600;">{ s.Employer.Name }</div>
-				<div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
-					EIN: <span class="mono">{ s.Employer.EIN }</span> · { s.CreatedAt.Format("2006-01-02") }
+				hx-push-url="true"
+			>
+				<div class="font-mono font-semibold">{ s.Employer.Name }</div>
+				<div class="text-[0.75rem] text-muted mt-1">
+					EIN: <span class="font-mono">{ s.Employer.EIN }</span> · { s.CreatedAt.Format("2006-01-02") }
 				</div>
 				if s.Notes != "" {
-					<div style="font-size:0.75rem;color:var(--muted);margin-top:4px;font-style:italic;">{ s.Notes }</div>
+					<div class="text-[0.75rem] text-muted mt-1 italic">{ s.Notes }</div>
 				}
 			</div>
 		}
 	}
+}
+
+// SectionHeader renders a labeled section divider with an optional muted subtitle.
+templ SectionHeader(label, sub string) {
+	<div class="font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 mb-4">
+		{ label }
+		if sub != "" {
+			<span class="font-normal text-[0.6rem] text-muted ml-2">{ sub }</span>
+		}
+	</div>
+}
+
+// FieldLabel renders a styled label with an optional hint in normal weight.
+templ FieldLabel(label, hint string) {
+	<label class="font-mono text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted block mb-0.5">
+		{ label }
+		if hint != "" {
+			<span class="font-normal normal-case">{ hint }</span>
+		}
+	</label>
 }
