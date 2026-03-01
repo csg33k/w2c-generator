@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -27,67 +28,135 @@ func New(dsn string) (*Repository, error) {
 	return r, nil
 }
 
-func (r *Repository) migrate() error {
-	_, err := r.db.Exec(`
-	CREATE TABLE IF NOT EXISTS submissions (
-		id               INTEGER PRIMARY KEY AUTOINCREMENT,
-		-- Submitter (RCA record)
-		bso_uid          TEXT    DEFAULT '',
-		contact_name     TEXT    DEFAULT '',
-		contact_phone    TEXT    DEFAULT '',
-		contact_email    TEXT    DEFAULT '',
-		preparer_code    TEXT    DEFAULT 'L',
-		resub_indicator  TEXT    DEFAULT '0',
-		resub_wfid       TEXT    DEFAULT '',
-		-- Employer (RCE record)
-		ein              TEXT    NOT NULL,
-		employer_name    TEXT    NOT NULL,
-		addr1            TEXT    DEFAULT '',
-		addr2            TEXT    DEFAULT '',
-		city             TEXT    DEFAULT '',
-		state            TEXT    DEFAULT '',
-		zip              TEXT    DEFAULT '',
-		zip_ext          TEXT    DEFAULT '',
-		agent_indicator  TEXT    DEFAULT '0',
-		agent_ein        TEXT    DEFAULT '',
-		terminating      INTEGER DEFAULT 0,
-		-- Meta
-		notes            TEXT    DEFAULT '',
-		created_at       DATETIME NOT NULL,
-		submitted_at     DATETIME
-	);
+// migration is a single versioned schema change, tracked in schema_migrations.
+// Migrations run in order on every startup; already-applied ones are skipped.
+// Never edit a migration that has shipped — add a new one instead.
+type migration struct {
+	version int
+	sql     string
+}
 
-	CREATE TABLE IF NOT EXISTS employees (
-		id            INTEGER PRIMARY KEY AUTOINCREMENT,
-		submission_id INTEGER NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
-		ssn           TEXT    NOT NULL,
-		original_ssn  TEXT    DEFAULT '',
-		first_name    TEXT    DEFAULT '',
-		middle_name   TEXT    DEFAULT '',
-		last_name     TEXT    DEFAULT '',
-		suffix        TEXT    DEFAULT '',
-		addr1         TEXT    DEFAULT '',
-		addr2         TEXT    DEFAULT '',
-		city          TEXT    DEFAULT '',
-		state         TEXT    DEFAULT '',
-		zip           TEXT    DEFAULT '',
-		zip_ext       TEXT    DEFAULT '',
-		orig_wages    INTEGER DEFAULT 0,
-		corr_wages    INTEGER DEFAULT 0,
-		orig_ss_wages INTEGER DEFAULT 0,
-		corr_ss_wages INTEGER DEFAULT 0,
-		orig_med_wages INTEGER DEFAULT 0,
-		corr_med_wages INTEGER DEFAULT 0,
-		orig_fed_tax  INTEGER DEFAULT 0,
-		corr_fed_tax  INTEGER DEFAULT 0,
-		orig_ss_tax   INTEGER DEFAULT 0,
-		corr_ss_tax   INTEGER DEFAULT 0,
-		orig_med_tax  INTEGER DEFAULT 0,
-		corr_med_tax  INTEGER DEFAULT 0,
-		created_at    DATETIME NOT NULL,
-		updated_at    DATETIME NOT NULL
-	);`)
-	return err
+var migrations = []migration{
+	{
+		// Initial schema.
+		version: 1,
+		sql: `
+		CREATE TABLE IF NOT EXISTS submissions (
+			id              INTEGER PRIMARY KEY AUTOINCREMENT,
+			ein             TEXT    NOT NULL,
+			employer_name   TEXT    NOT NULL,
+			addr1           TEXT    DEFAULT '',
+			addr2           TEXT    DEFAULT '',
+			city            TEXT    DEFAULT '',
+			state           TEXT    DEFAULT '',
+			zip             TEXT    DEFAULT '',
+			zip_ext         TEXT    DEFAULT '',
+			agent_indicator TEXT    DEFAULT '0',
+			agent_ein       TEXT    DEFAULT '',
+			terminating     INTEGER DEFAULT 0,
+			notes           TEXT    DEFAULT '',
+			created_at      DATETIME NOT NULL,
+			submitted_at    DATETIME
+		);
+		CREATE TABLE IF NOT EXISTS employees (
+			id             INTEGER PRIMARY KEY AUTOINCREMENT,
+			submission_id  INTEGER NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
+			ssn            TEXT    NOT NULL,
+			original_ssn   TEXT    DEFAULT '',
+			first_name     TEXT    DEFAULT '',
+			middle_name    TEXT    DEFAULT '',
+			last_name      TEXT    DEFAULT '',
+			suffix         TEXT    DEFAULT '',
+			addr1          TEXT    DEFAULT '',
+			addr2          TEXT    DEFAULT '',
+			city           TEXT    DEFAULT '',
+			state          TEXT    DEFAULT '',
+			zip            TEXT    DEFAULT '',
+			zip_ext        TEXT    DEFAULT '',
+			orig_wages     INTEGER DEFAULT 0,
+			corr_wages     INTEGER DEFAULT 0,
+			orig_ss_wages  INTEGER DEFAULT 0,
+			corr_ss_wages  INTEGER DEFAULT 0,
+			orig_med_wages INTEGER DEFAULT 0,
+			corr_med_wages INTEGER DEFAULT 0,
+			orig_fed_tax   INTEGER DEFAULT 0,
+			corr_fed_tax   INTEGER DEFAULT 0,
+			orig_ss_tax    INTEGER DEFAULT 0,
+			corr_ss_tax    INTEGER DEFAULT 0,
+			orig_med_tax   INTEGER DEFAULT 0,
+			corr_med_tax   INTEGER DEFAULT 0,
+			created_at     DATETIME NOT NULL,
+			updated_at     DATETIME NOT NULL
+		)`,
+	},
+	{
+		// Add BSO submitter fields to submissions (required by AccuWage RCA record).
+		// Existing rows get sensible defaults and can be edited through the UI.
+		version: 2,
+		sql: `
+		ALTER TABLE submissions ADD COLUMN bso_uid         TEXT DEFAULT '';
+		ALTER TABLE submissions ADD COLUMN contact_name    TEXT DEFAULT '';
+		ALTER TABLE submissions ADD COLUMN contact_phone   TEXT DEFAULT '';
+		ALTER TABLE submissions ADD COLUMN contact_email   TEXT DEFAULT '';
+		ALTER TABLE submissions ADD COLUMN preparer_code   TEXT DEFAULT 'L';
+		ALTER TABLE submissions ADD COLUMN resub_indicator TEXT DEFAULT '0';
+		ALTER TABLE submissions ADD COLUMN resub_wfid      TEXT DEFAULT ''`,
+	},
+}
+
+func (r *Repository) migrate() error {
+	if _, err := r.db.Exec(`
+		CREATE TABLE IF NOT EXISTS schema_migrations (
+			version    INTEGER PRIMARY KEY,
+			applied_at DATETIME NOT NULL
+		)`); err != nil {
+		return fmt.Errorf("create schema_migrations: %w", err)
+	}
+
+	for _, m := range migrations {
+		var count int
+		if err := r.db.QueryRow(
+			`SELECT COUNT(*) FROM schema_migrations WHERE version=?`, m.version,
+		).Scan(&count); err != nil {
+			return fmt.Errorf("check migration %d: %w", m.version, err)
+		}
+		if count > 0 {
+			continue // already applied
+		}
+
+		// SQLite requires statements to be executed one at a time.
+		for _, stmt := range splitSQL(m.sql) {
+			if _, err := r.db.Exec(stmt); err != nil {
+				return fmt.Errorf("migration %d %q: %w", m.version, stmt[:min(40, len(stmt))], err)
+			}
+		}
+
+		if _, err := r.db.Exec(
+			`INSERT INTO schema_migrations (version, applied_at) VALUES (?,?)`,
+			m.version, time.Now(),
+		); err != nil {
+			return fmt.Errorf("record migration %d: %w", m.version, err)
+		}
+	}
+	return nil
+}
+
+// splitSQL splits a semicolon-delimited SQL string into individual statements.
+func splitSQL(s string) []string {
+	var out []string
+	for _, part := range strings.Split(s, ";") {
+		if part = strings.TrimSpace(part); part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func (r *Repository) CreateSubmission(ctx context.Context, s *domain.Submission) error {
