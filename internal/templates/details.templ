@@ -2,7 +2,7 @@ package templates
 
 import "github.com/csg33k/w2c-generator/internal/domain"
 
-// Detail is the full submission page with the add-employee form and employee list.
+// Detail is the submission detail page shell.
 templ Detail(s *domain.Submission) {
 	@Base("W-2c · " + s.Employer.Name) {
 		<!-- Back nav -->
@@ -36,11 +36,7 @@ templ Detail(s *domain.Submission) {
 		</div>
 
 		<div class="grid grid-cols-[400px_1fr] gap-7 items-start">
-
-			<!-- Add Employee Form -->
 			@AddEmployeeForm(s.ID)
-
-			<!-- Employee List -->
 			<div>
 				<div class="font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 mb-4">
 					Employee Corrections ({ itoa(int64(len(s.Employees))) })
@@ -49,198 +45,6 @@ templ Detail(s *domain.Submission) {
 					@EmployeeList(s)
 				</div>
 			</div>
-
 		</div>
 	}
-}
-
-// AddEmployeeForm is the sidebar form for adding a new employee correction.
-templ AddEmployeeForm(submissionID int64) {
-	<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-[22px]">
-		@SectionHeader("Add Employee Correction", "")
-		<form
-			hx-post={ "/submissions/" + itoa(submissionID) + "/employees" }
-			hx-target="#employee-list"
-			hx-swap="innerHTML"
-			hx-on:htmx:after-request="this.reset()"
-		>
-			<!-- Identity -->
-			@SectionHeader("Identity", "")
-			<div class="grid gap-2.5">
-				<div>
-					@FieldLabel("Correct SSN *", "")
-					<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="font-mono"/>
-				</div>
-				<div>
-					@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
-					<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="font-mono"/>
-				</div>
-				<div class="grid grid-cols-2 gap-2">
-					<div>
-						@FieldLabel("First Name *", "")
-						<input type="text" name="first_name" required maxlength="12"/>
-					</div>
-					<div>
-						@FieldLabel("Last Name *", "")
-						<input type="text" name="last_name" required maxlength="15"/>
-					</div>
-				</div>
-				<div class="grid grid-cols-[2fr_1fr] gap-2">
-					<div>
-						@FieldLabel("Middle Name", "")
-						<input type="text" name="middle_name" maxlength="15"/>
-					</div>
-					<div>
-						@FieldLabel("Suffix", "")
-						<input type="text" name="suffix" placeholder="JR" maxlength="4"/>
-					</div>
-				</div>
-			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			<!-- Address -->
-			@SectionHeader("Employee Address", "")
-			<div class="grid gap-2">
-				<div>
-					@FieldLabel("Address Line 1", "")
-					<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="40"/>
-				</div>
-				<div>
-					@FieldLabel("Address Line 2", "")
-					<input type="text" name="addr2" placeholder="APT 4B" maxlength="40"/>
-				</div>
-				<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
-					<div>
-						@FieldLabel("City", "")
-						<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
-					</div>
-					<div>
-						@FieldLabel("State", "")
-						<input type="text" name="state" placeholder="IL" maxlength="2" class="font-mono"/>
-					</div>
-					<div>
-						@FieldLabel("ZIP", "")
-						<input type="text" name="zip" placeholder="62701" maxlength="5" class="font-mono"/>
-					</div>
-				</div>
-			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			<!-- Wages & Social Security -->
-			@SectionHeader("Wages & Social Security", "")
-			<div class="grid gap-2">
-				@amountRow("BOX 1 ORIG", "Wages/Tips/Other (orig)", "orig_wages", "BOX 1 CORR", "Wages/Tips/Other (corr)", "corr_wages")
-				@amountRow("BOX 3 ORIG", "SS Wages (orig)", "orig_ss_wages", "BOX 3 CORR", "SS Wages (corr)", "corr_ss_wages")
-				@amountRow("BOX 5 ORIG", "Medicare Wages (orig)", "orig_med_wages", "BOX 5 CORR", "Medicare Wages (corr)", "corr_med_wages")
-				@amountRow("BOX 7 ORIG", "SS Tips (orig)", "orig_ss_tips", "BOX 7 CORR", "SS Tips (corr)", "corr_ss_tips")
-			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			<!-- Tax Withholdings -->
-			@SectionHeader("Tax Withholdings", "")
-			<div class="grid gap-2">
-				@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
-				@amountRow("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", "BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax")
-				@amountRow("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", "BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax")
-			</div>
-
-			<div class="mt-4 flex justify-end">
-				<button type="submit" class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent">
-					ADD EMPLOYEE +
-				</button>
-			</div>
-		</form>
-	</div>
-}
-
-// amountRow renders an original/correct pair of monetary inputs side by side.
-templ amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName string) {
-	<div class="grid grid-cols-2 gap-2">
-		<div>
-			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ origBox }</div>
-			@FieldLabel(origLabel, "")
-			<input type="number" name={ origName } step="0.01" min="0" placeholder="0.00" class="font-mono"/>
-		</div>
-		<div>
-			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ corrBox }</div>
-			@FieldLabel(corrLabel, "")
-			<input type="number" name={ corrName } step="0.01" min="0" placeholder="0.00" class="font-mono"/>
-		</div>
-	</div>
-}
-
-// EmployeeList is the HTMX-swappable fragment showing all employee corrections.
-templ EmployeeList(s *domain.Submission) {
-	if len(s.Employees) == 0 {
-		<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-5 text-center font-mono text-[0.8rem] text-muted">
-			No employees added yet. Use the form on the left to add corrections.
-		</div>
-	} else {
-		for _, e := range s.Employees {
-			<div class="bg-white/70 border border-ledger border-l-4 border-l-ink px-5 py-4 mb-2.5">
-				<div class="flex justify-between items-start">
-					<div>
-						<div class="font-mono font-semibold text-[1rem]">
-							{ e.LastName }, { e.FirstName }
-							if e.MiddleName != "" {
-								<span class="text-muted font-normal"> { e.MiddleName }</span>
-							}
-						</div>
-						<div class="text-[0.75rem] text-muted mt-0.5">
-							SSN: <span class="font-mono">{ e.SSN }</span>
-							if e.OriginalSSN != "" {
-								· Orig SSN: <span class="font-mono">{ e.OriginalSSN }</span>
-							}
-						</div>
-						if e.City != "" || e.State != "" {
-							<div class="text-[0.75rem] text-muted mt-0.5">
-								{ e.AddressLine1 }
-								if e.City != "" {
-									· { e.City }, { e.State } { e.ZIP }
-								}
-							</div>
-						}
-					</div>
-					<button
-						class="font-mono font-semibold text-[0.7rem] tracking-[0.08em] px-3 py-1 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-accent border-accent hover:bg-accent hover:text-white"
-						hx-delete={ "/employees/" + itoa(e.ID) + "?sub=" + itoa(s.ID) }
-						hx-target="#employee-list"
-						hx-swap="innerHTML"
-						hx-confirm="Remove this employee from the submission?"
-					>
-						REMOVE
-					</button>
-				</div>
-				<div class="mt-3 grid grid-cols-4 gap-2 text-[0.75rem]">
-					@amountCell("BOX 1 — WAGES/TIPS",     e.Amounts.OriginalWagesTipsOther,         e.Amounts.CorrectWagesTipsOther)
-					@amountCell("BOX 2 — FED TAX",        e.Amounts.OriginalFederalIncomeTax,        e.Amounts.CorrectFederalIncomeTax)
-					@amountCell("BOX 3 — SS WAGES",       e.Amounts.OriginalSocialSecurityWages,     e.Amounts.CorrectSocialSecurityWages)
-					@amountCell("BOX 4 — SS TAX",         e.Amounts.OriginalSocialSecurityTax,       e.Amounts.CorrectSocialSecurityTax)
-					@amountCell("BOX 5 — MED WAGES",      e.Amounts.OriginalMedicareWages,           e.Amounts.CorrectMedicareWages)
-					@amountCell("BOX 6 — MED TAX",        e.Amounts.OriginalMedicareTax,             e.Amounts.CorrectMedicareTax)
-					@amountCell("BOX 7 — SS TIPS",        e.Amounts.OriginalSocialSecurityTips,      e.Amounts.CorrectSocialSecurityTips)
-				</div>
-			</div>
-		}
-	}
-}
-
-// amountCell renders one box's original/correct pair in the employee card.
-templ amountCell(label string, orig, corr int64) {
-	<div class="bg-ledger p-2 rounded-sm">
-		<div class="font-mono text-[0.6rem] text-muted mb-1">{ label }</div>
-		<div class="grid grid-cols-2 gap-1">
-			<div>
-				<div class="text-[0.6rem] text-muted">ORIG</div>
-				<div class="font-mono">{ centsToDisplay(orig) }</div>
-			</div>
-			<div>
-				<div class="text-[0.6rem] text-muted">CORR</div>
-				<div class="font-mono text-accent">{ centsToDisplay(corr) }</div>
-			</div>
-		</div>
-	</div>
 }

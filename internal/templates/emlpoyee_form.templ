@@ -1,0 +1,115 @@
+package templates
+
+// AddEmployeeForm is the sidebar form for adding a new employee correction.
+templ AddEmployeeForm(submissionID int64) {
+	<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-[22px]">
+		@SectionHeader("Add Employee Correction", "")
+		<form
+			hx-post={ "/submissions/" + itoa(submissionID) + "/employees" }
+			hx-target="#employee-list"
+			hx-swap="innerHTML"
+			hx-on:htmx:after-request="this.reset()"
+		>
+			@SectionHeader("Identity", "")
+			<div class="grid gap-2.5">
+				<div>
+					@FieldLabel("Correct SSN *", "")
+					<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="font-mono"/>
+				</div>
+				<div>
+					@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
+					<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="font-mono"/>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("First Name *", "")
+						<input type="text" name="first_name" required maxlength="12"/>
+					</div>
+					<div>
+						@FieldLabel("Last Name *", "")
+						<input type="text" name="last_name" required maxlength="15"/>
+					</div>
+				</div>
+				<div class="grid grid-cols-[2fr_1fr] gap-2">
+					<div>
+						@FieldLabel("Middle Name", "")
+						<input type="text" name="middle_name" maxlength="15"/>
+					</div>
+					<div>
+						@FieldLabel("Suffix", "")
+						<input type="text" name="suffix" placeholder="JR" maxlength="4"/>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Employee Address", "")
+			<div class="grid gap-2">
+				<div>
+					@FieldLabel("Address Line 1", "")
+					<input type="text" name="emp_addr1" placeholder="123 MAIN ST" maxlength="40"/>
+				</div>
+				<div>
+					@FieldLabel("Address Line 2", "")
+					<input type="text" name="emp_addr2" placeholder="APT 4B" maxlength="40"/>
+				</div>
+				<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
+					<div>
+						@FieldLabel("City", "")
+						<input type="text" name="emp_city" placeholder="SPRINGFIELD" maxlength="39"/>
+					</div>
+					<div>
+						@FieldLabel("State", "")
+						<input type="text" name="emp_state" placeholder="IL" maxlength="2" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("ZIP", "")
+						<input type="text" name="emp_zip" placeholder="62701" maxlength="5" class="font-mono"/>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Wages & Social Security", "")
+			<div class="grid gap-2">
+				@amountRow("BOX 1 ORIG", "Wages/Tips/Other (orig)", "orig_wages", "BOX 1 CORR", "Wages/Tips/Other (corr)", "corr_wages")
+				@amountRow("BOX 3 ORIG", "SS Wages (orig)", "orig_ss_wages", "BOX 3 CORR", "SS Wages (corr)", "corr_ss_wages")
+				@amountRow("BOX 5 ORIG", "Medicare Wages (orig)", "orig_med_wages", "BOX 5 CORR", "Medicare Wages (corr)", "corr_med_wages")
+				@amountRow("BOX 7 ORIG", "SS Tips (orig)", "orig_ss_tips", "BOX 7 CORR", "SS Tips (corr)", "corr_ss_tips")
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Tax Withholdings", "")
+			<div class="grid gap-2">
+				@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
+				@amountRow("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", "BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax")
+				@amountRow("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", "BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax")
+			</div>
+
+			<div class="mt-4 flex justify-end">
+				<button type="submit" class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent">
+					ADD EMPLOYEE +
+				</button>
+			</div>
+		</form>
+	</div>
+}
+
+// amountRow renders an original/correct pair of monetary inputs side by side.
+templ amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName string) {
+	<div class="grid grid-cols-2 gap-2">
+		<div>
+			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ origBox }</div>
+			@FieldLabel(origLabel, "")
+			<input type="number" name={ origName } step="0.01" min="0" placeholder="0.00" class="font-mono"/>
+		</div>
+		<div>
+			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ corrBox }</div>
+			@FieldLabel(corrLabel, "")
+			<input type="number" name={ corrName } step="0.01" min="0" placeholder="0.00" class="font-mono"/>
+		</div>
+	</div>
+}
