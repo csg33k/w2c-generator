@@ -61,12 +61,12 @@ func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
 		Employer: domain.EmployerRecord{
 			EIN:            stripDashes(r.FormValue("ein")),
 			Name:           r.FormValue("employer_name"),
-			AddressLine1:   r.FormValue("addr1"),
-			AddressLine2:   r.FormValue("addr2"),
-			City:           r.FormValue("city"),
-			State:          r.FormValue("state"),
-			ZIP:            r.FormValue("zip"),
-			ZIPExtension:   r.FormValue("zip_ext"),
+			AddressLine1:   r.FormValue("emp_addr1"),
+			AddressLine2:   r.FormValue("emp_addr2"),
+			City:           r.FormValue("emp_city"),
+			State:          r.FormValue("emp_state"),
+			ZIP:            r.FormValue("emp_zip"),
+			ZIPExtension:   r.FormValue("emp_zip_ext"),
 			AgentIndicator: "0",
 			TaxYear:        domain.TaxYear2021,
 		},
@@ -125,12 +125,12 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 		MiddleName:   r.FormValue("middle_name"),
 		LastName:     r.FormValue("last_name"),
 		Suffix:       r.FormValue("suffix"),
-		AddressLine1: r.FormValue("addr1"),
-		AddressLine2: r.FormValue("addr2"),
-		City:         r.FormValue("city"),
-		State:        r.FormValue("state"),
-		ZIP:          r.FormValue("zip"),
-		ZIPExtension: r.FormValue("zip_ext"),
+		AddressLine1: r.FormValue("emp_addr1"),
+		AddressLine2: r.FormValue("emp_addr2"),
+		City:         r.FormValue("emp_city"),
+		State:        r.FormValue("emp_state"),
+		ZIP:          r.FormValue("emp_zip"),
+		ZIPExtension: r.FormValue("emp_zip_ext"),
 		Amounts: domain.MonetaryAmounts{
 			OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
 			CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
@@ -235,16 +235,6 @@ func stripNonDigits(s string) string {
 	}
 	return b.String()
 }
-
-//func stripNonDigits(s string) string {
-//	var b strings.Builder
-//	for _, r := range s {
-//		if r >= "0"[0] && r <= "9"[0] {
-//			b.WriteRune(r)
-//		}
-//	}
-//	return b.String()
-//}
 
 func parseCents(s string) int64 {
 	s = strings.TrimSpace(s)
