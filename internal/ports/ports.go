@@ -8,8 +8,6 @@ import (
 )
 
 // SubmissionRepository defines persistence operations.
-// Update methods are intentionally omitted — submissions and employees
-// are created once and deleted; edits are not supported in the current UI.
 type SubmissionRepository interface {
 	CreateSubmission(ctx context.Context, s *domain.Submission) error
 	GetSubmission(ctx context.Context, id int64) (*domain.Submission, error)
@@ -17,6 +15,8 @@ type SubmissionRepository interface {
 	DeleteSubmission(ctx context.Context, id int64) error
 
 	AddEmployee(ctx context.Context, submissionID int64, e *domain.EmployeeRecord) error
+	GetEmployee(ctx context.Context, id int64) (*domain.EmployeeRecord, error)
+	UpdateEmployee(ctx context.Context, e *domain.EmployeeRecord) error
 	DeleteEmployee(ctx context.Context, id int64) error
 }
 

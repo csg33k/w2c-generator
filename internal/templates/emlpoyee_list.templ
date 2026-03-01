@@ -10,65 +10,81 @@ templ EmployeeList(s *domain.Submission) {
 		</div>
 	} else {
 		for _, e := range s.Employees {
-			<div class="bg-white/70 border border-ledger border-l-4 border-l-ink px-5 py-4 mb-2.5">
-				<div class="flex justify-between items-start">
-					<div>
-						<div class="font-mono font-semibold text-[1rem]">
-							{ e.LastName }, { e.FirstName }
-							if e.MiddleName != "" {
-								<span class="text-muted font-normal"> { e.MiddleName }</span>
-							}
-							if e.Suffix != "" {
-								<span class="text-muted font-normal"> { e.Suffix }</span>
-							}
-						</div>
-						<div class="text-[0.75rem] text-muted mt-0.5">
-							SSN: <span class="font-mono">{ e.SSN }</span>
-							if e.OriginalSSN != "" {
-								· Orig SSN: <span class="font-mono">{ e.OriginalSSN }</span>
-							}
-						</div>
-						if e.AddressLine1 != "" {
-							<div class="text-[0.75rem] text-muted mt-0.5 font-mono">{ e.AddressLine1 }</div>
-						}
-						if e.AddressLine2 != "" {
-							<div class="text-[0.75rem] text-muted font-mono">{ e.AddressLine2 }</div>
-						}
-						if e.City != "" || e.State != "" || e.ZIP != "" {
-							<div class="text-[0.75rem] text-muted font-mono">
-								{ e.City }
-								if e.City != "" && e.State != "" {
-									,
-								}
-								{ e.State }
-								if e.ZIP != "" {
-									 { e.ZIP }
-								}
-							</div>
-						}
-					</div>
-					<button
-						class="font-mono font-semibold text-[0.7rem] tracking-[0.08em] px-3 py-1 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-accent border-accent hover:bg-accent hover:text-white"
-						hx-delete={ "/employees/" + itoa(e.ID) + "?sub=" + itoa(s.ID) }
-						hx-target="#employee-list"
-						hx-swap="innerHTML"
-						hx-confirm="Remove this employee from the submission?"
-					>
-						REMOVE
-					</button>
-				</div>
-				<div class="mt-3 grid grid-cols-4 gap-2 text-[0.75rem]">
-					@amountCell("BOX 1 — WAGES/TIPS",  e.Amounts.OriginalWagesTipsOther,         e.Amounts.CorrectWagesTipsOther)
-					@amountCell("BOX 2 — FED TAX",     e.Amounts.OriginalFederalIncomeTax,        e.Amounts.CorrectFederalIncomeTax)
-					@amountCell("BOX 3 — SS WAGES",    e.Amounts.OriginalSocialSecurityWages,     e.Amounts.CorrectSocialSecurityWages)
-					@amountCell("BOX 4 — SS TAX",      e.Amounts.OriginalSocialSecurityTax,       e.Amounts.CorrectSocialSecurityTax)
-					@amountCell("BOX 5 — MED WAGES",   e.Amounts.OriginalMedicareWages,           e.Amounts.CorrectMedicareWages)
-					@amountCell("BOX 6 — MED TAX",     e.Amounts.OriginalMedicareTax,             e.Amounts.CorrectMedicareTax)
-					@amountCell("BOX 7 — SS TIPS",     e.Amounts.OriginalSocialSecurityTips,      e.Amounts.CorrectSocialSecurityTips)
-				</div>
-			</div>
+			@EmployeeCard(e, s.ID)
 		}
 	}
+}
+
+// EmployeeCard is the read-only card for a single employee correction.
+// It carries its own id so it can be individually targeted by HTMX during edit/save/cancel.
+templ EmployeeCard(e domain.EmployeeRecord, subID int64) {
+	<div id={ "employee-" + itoa(e.ID) } class="bg-white/70 border border-ledger border-l-4 border-l-ink px-5 py-4 mb-2.5">
+		<div class="flex justify-between items-start">
+			<div>
+				<div class="font-mono font-semibold text-[1rem]">
+					{ e.LastName }, { e.FirstName }
+					if e.MiddleName != "" {
+						<span class="text-muted font-normal"> { e.MiddleName }</span>
+					}
+					if e.Suffix != "" {
+						<span class="text-muted font-normal"> { e.Suffix }</span>
+					}
+				</div>
+				<div class="text-[0.75rem] text-muted mt-0.5">
+					SSN: <span class="font-mono">{ e.SSN }</span>
+					if e.OriginalSSN != "" {
+						· Orig SSN: <span class="font-mono">{ e.OriginalSSN }</span>
+					}
+				</div>
+				if e.AddressLine1 != "" {
+					<div class="text-[0.75rem] text-muted mt-0.5 font-mono">{ e.AddressLine1 }</div>
+				}
+				if e.AddressLine2 != "" {
+					<div class="text-[0.75rem] text-muted font-mono">{ e.AddressLine2 }</div>
+				}
+				if e.City != "" || e.State != "" || e.ZIP != "" {
+					<div class="text-[0.75rem] text-muted font-mono">
+						{ e.City }
+						if e.City != "" && e.State != "" {
+							,
+						}
+						{ e.State }
+						if e.ZIP != "" {
+							 { e.ZIP }
+						}
+					</div>
+				}
+			</div>
+			<div class="flex gap-2 items-start shrink-0 ml-4">
+				<button
+					class="font-mono font-semibold text-[0.7rem] tracking-[0.08em] px-3 py-1 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-ink border-ink hover:bg-ink hover:text-white"
+					hx-get={ "/employees/" + itoa(e.ID) + "/edit" }
+					hx-target={ "#employee-" + itoa(e.ID) }
+					hx-swap="outerHTML"
+				>
+					EDIT
+				</button>
+				<button
+					class="font-mono font-semibold text-[0.7rem] tracking-[0.08em] px-3 py-1 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-accent border-accent hover:bg-accent hover:text-white"
+					hx-delete={ "/employees/" + itoa(e.ID) + "?sub=" + itoa(subID) }
+					hx-target="#employee-list"
+					hx-swap="innerHTML"
+					hx-confirm="Remove this employee from the submission?"
+				>
+					REMOVE
+				</button>
+			</div>
+		</div>
+		<div class="mt-3 grid grid-cols-4 gap-2 text-[0.75rem]">
+			@amountCell("BOX 1 — WAGES/TIPS", e.Amounts.OriginalWagesTipsOther,         e.Amounts.CorrectWagesTipsOther)
+			@amountCell("BOX 2 — FED TAX",    e.Amounts.OriginalFederalIncomeTax,        e.Amounts.CorrectFederalIncomeTax)
+			@amountCell("BOX 3 — SS WAGES",   e.Amounts.OriginalSocialSecurityWages,     e.Amounts.CorrectSocialSecurityWages)
+			@amountCell("BOX 4 — SS TAX",     e.Amounts.OriginalSocialSecurityTax,       e.Amounts.CorrectSocialSecurityTax)
+			@amountCell("BOX 5 — MED WAGES",  e.Amounts.OriginalMedicareWages,           e.Amounts.CorrectMedicareWages)
+			@amountCell("BOX 6 — MED TAX",    e.Amounts.OriginalMedicareTax,             e.Amounts.CorrectMedicareTax)
+			@amountCell("BOX 7 — SS TIPS",    e.Amounts.OriginalSocialSecurityTips,      e.Amounts.CorrectSocialSecurityTips)
+		</div>
+	</div>
 }
 
 // amountCell renders one box's original/correct pair in the employee card.

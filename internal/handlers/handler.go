@@ -31,6 +31,9 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("GET /submissions/{id}", h.viewSubmission)
 	mux.HandleFunc("DELETE /submissions/{id}", h.deleteSubmission)
 	mux.HandleFunc("POST /submissions/{id}/employees", h.addEmployee)
+	mux.HandleFunc("GET /employees/{id}/edit", h.editEmployeeForm)
+	mux.HandleFunc("GET /employees/{id}/card", h.getEmployeeCard)
+	mux.HandleFunc("PUT /employees/{id}", h.updateEmployee)
 	mux.HandleFunc("DELETE /employees/{id}", h.deleteEmployee)
 	mux.HandleFunc("GET /submissions/{id}/generate", h.generateFile)
 	return mux
@@ -72,7 +75,7 @@ func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
 			State:          r.FormValue("emp_state"),
 			ZIP:            r.FormValue("emp_zip"),
 			ZIPExtension:   r.FormValue("emp_zip_ext"),
-			AgentIndicator: "0", // not exposed in UI yet
+			AgentIndicator: "0",
 			TaxYear:        domain.TaxYear2021,
 		},
 		Notes: r.FormValue("notes"),
@@ -165,6 +168,88 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 	render(w, r, templates.EmployeeList(s))
 }
 
+// editEmployeeForm renders the inline edit form for a single employee card.
+func (h *Handler) editEmployeeForm(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	e, err := h.repo.GetEmployee(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	render(w, r, templates.EmployeeEditForm(e))
+}
+
+// getEmployeeCard renders just the read-only card for a single employee (used by cancel).
+func (h *Handler) getEmployeeCard(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	e, err := h.repo.GetEmployee(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	render(w, r, templates.EmployeeCard(*e, e.SubmissionID))
+}
+
+// updateEmployee handles PUT /employees/{id} and renders the updated card.
+func (h *Handler) updateEmployee(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	// Fetch first so we preserve SubmissionID, CreatedAt, etc.
+	e, err := h.repo.GetEmployee(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	e.SSN = stripDashes(r.FormValue("ssn"))
+	e.OriginalSSN = stripDashes(r.FormValue("original_ssn"))
+	e.FirstName = r.FormValue("first_name")
+	e.MiddleName = r.FormValue("middle_name")
+	e.LastName = r.FormValue("last_name")
+	e.Suffix = r.FormValue("suffix")
+	e.AddressLine1 = r.FormValue("emp_addr1")
+	e.AddressLine2 = r.FormValue("emp_addr2")
+	e.City = r.FormValue("emp_city")
+	e.State = r.FormValue("emp_state")
+	e.ZIP = r.FormValue("emp_zip")
+	e.ZIPExtension = r.FormValue("emp_zip_ext")
+	e.Amounts = domain.MonetaryAmounts{
+		OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
+		CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
+		OriginalSocialSecurityWages: parseCents(r.FormValue("orig_ss_wages")),
+		CorrectSocialSecurityWages:  parseCents(r.FormValue("corr_ss_wages")),
+		OriginalMedicareWages:       parseCents(r.FormValue("orig_med_wages")),
+		CorrectMedicareWages:        parseCents(r.FormValue("corr_med_wages")),
+		OriginalFederalIncomeTax:    parseCents(r.FormValue("orig_fed_tax")),
+		CorrectFederalIncomeTax:     parseCents(r.FormValue("corr_fed_tax")),
+		OriginalSocialSecurityTax:   parseCents(r.FormValue("orig_ss_tax")),
+		CorrectSocialSecurityTax:    parseCents(r.FormValue("corr_ss_tax")),
+		OriginalMedicareTax:         parseCents(r.FormValue("orig_med_tax")),
+		CorrectMedicareTax:          parseCents(r.FormValue("corr_med_tax")),
+		OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
+		CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
+	}
+	if err := h.repo.UpdateEmployee(r.Context(), e); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	render(w, r, templates.EmployeeCard(*e, e.SubmissionID))
+}
+
 func (h *Handler) deleteEmployee(w http.ResponseWriter, r *http.Request) {
 	empID, err := pathID(r, "id")
 	if err != nil {
@@ -235,7 +320,6 @@ func stripDashes(s string) string {
 func stripNonDigits(s string) string {
 	var b strings.Builder
 	for _, r := range s {
-		// Use rune literals like '0' and '9'
 		if r >= '0' && r <= '9' {
 			b.WriteRune(r)
 		}

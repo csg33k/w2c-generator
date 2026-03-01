@@ -1,0 +1,137 @@
+package templates
+
+import "github.com/csg33k/w2c-generator/internal/domain"
+
+// EmployeeEditForm is the inline edit form that replaces an EmployeeCard via HTMX outerHTML swap.
+// It submits via PUT and the handler renders the updated EmployeeCard in its place.
+// Cancel fetches the original card back without saving.
+templ EmployeeEditForm(e *domain.EmployeeRecord) {
+	<div id={ "employee-" + itoa(e.ID) } class="bg-white/70 border border-ledger border-l-4 border-l-accent px-5 py-4 mb-2.5">
+		@SectionHeader("Editing: "+e.LastName+", "+e.FirstName, "")
+		<form
+			hx-put={ "/employees/" + itoa(e.ID) }
+			hx-target={ "#employee-" + itoa(e.ID) }
+			hx-swap="outerHTML"
+		>
+			@SectionHeader("Identity", "")
+			<div class="grid gap-2.5">
+				<div>
+					@FieldLabel("Correct SSN *", "")
+					<input type="text" name="ssn" value={ e.SSN } required maxlength="11" class="font-mono"/>
+				</div>
+				<div>
+					@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
+					<input type="text" name="original_ssn" value={ e.OriginalSSN } maxlength="11" class="font-mono"/>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("First Name *", "")
+						<input type="text" name="first_name" value={ e.FirstName } required maxlength="12"/>
+					</div>
+					<div>
+						@FieldLabel("Last Name *", "")
+						<input type="text" name="last_name" value={ e.LastName } required maxlength="15"/>
+					</div>
+				</div>
+				<div class="grid grid-cols-[2fr_1fr] gap-2">
+					<div>
+						@FieldLabel("Middle Name", "")
+						<input type="text" name="middle_name" value={ e.MiddleName } maxlength="15"/>
+					</div>
+					<div>
+						@FieldLabel("Suffix", "")
+						<input type="text" name="suffix" value={ e.Suffix } maxlength="4"/>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Employee Address", "")
+			<div class="grid gap-2">
+				<div>
+					@FieldLabel("Address Line 1", "")
+					<input type="text" name="emp_addr1" value={ e.AddressLine1 } maxlength="40"/>
+				</div>
+				<div>
+					@FieldLabel("Address Line 2", "")
+					<input type="text" name="emp_addr2" value={ e.AddressLine2 } maxlength="40"/>
+				</div>
+				<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
+					<div>
+						@FieldLabel("City", "")
+						<input type="text" name="emp_city" value={ e.City } maxlength="39"/>
+					</div>
+					<div>
+						@FieldLabel("State", "")
+						<input type="text" name="emp_state" value={ e.State } maxlength="2" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("ZIP", "")
+						<input type="text" name="emp_zip" value={ e.ZIP } maxlength="5" class="font-mono"/>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Wages & Social Security", "")
+			<div class="grid gap-2">
+				@amountRowPrefilled("BOX 1 ORIG", "Wages/Tips/Other (orig)", "orig_wages", e.Amounts.OriginalWagesTipsOther,
+					"BOX 1 CORR", "Wages/Tips/Other (corr)", "corr_wages", e.Amounts.CorrectWagesTipsOther)
+				@amountRowPrefilled("BOX 3 ORIG", "SS Wages (orig)", "orig_ss_wages", e.Amounts.OriginalSocialSecurityWages,
+					"BOX 3 CORR", "SS Wages (corr)", "corr_ss_wages", e.Amounts.CorrectSocialSecurityWages)
+				@amountRowPrefilled("BOX 5 ORIG", "Medicare Wages (orig)", "orig_med_wages", e.Amounts.OriginalMedicareWages,
+					"BOX 5 CORR", "Medicare Wages (corr)", "corr_med_wages", e.Amounts.CorrectMedicareWages)
+				@amountRowPrefilled("BOX 7 ORIG", "SS Tips (orig)", "orig_ss_tips", e.Amounts.OriginalSocialSecurityTips,
+					"BOX 7 CORR", "SS Tips (corr)", "corr_ss_tips", e.Amounts.CorrectSocialSecurityTips)
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Tax Withholdings", "")
+			<div class="grid gap-2">
+				@amountRowPrefilled("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", e.Amounts.OriginalFederalIncomeTax,
+					"BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax", e.Amounts.CorrectFederalIncomeTax)
+				@amountRowPrefilled("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", e.Amounts.OriginalSocialSecurityTax,
+					"BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax", e.Amounts.CorrectSocialSecurityTax)
+				@amountRowPrefilled("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", e.Amounts.OriginalMedicareTax,
+					"BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax", e.Amounts.CorrectMedicareTax)
+			</div>
+
+			<div class="mt-4 flex justify-end gap-2">
+				<button
+					type="button"
+					class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-muted border-rule hover:border-ink hover:text-ink"
+					hx-get={ "/employees/" + itoa(e.ID) + "/card" }
+					hx-target={ "#employee-" + itoa(e.ID) }
+					hx-swap="outerHTML"
+				>
+					CANCEL
+				</button>
+				<button
+					type="submit"
+					class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent"
+				>
+					SAVE CHANGES
+				</button>
+			</div>
+		</form>
+	</div>
+}
+
+// amountRowPrefilled is like amountRow but with pre-populated cent values for the edit form.
+templ amountRowPrefilled(origBox, origLabel, origName string, origVal int64, corrBox, corrLabel, corrName string, corrVal int64) {
+	<div class="grid grid-cols-2 gap-2">
+		<div>
+			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ origBox }</div>
+			@FieldLabel(origLabel, "")
+			<input type="number" name={ origName } value={ centsToDisplay(origVal) } step="0.01" min="0" class="font-mono"/>
+		</div>
+		<div>
+			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ corrBox }</div>
+			@FieldLabel(corrLabel, "")
+			<input type="number" name={ corrName } value={ centsToDisplay(corrVal) } step="0.01" min="0" class="font-mono"/>
+		</div>
+	</div>
+}

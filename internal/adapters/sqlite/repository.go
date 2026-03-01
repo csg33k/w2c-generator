@@ -217,6 +217,42 @@ func (r *Repository) AddEmployee(ctx context.Context, submissionID int64, e *dom
 	return nil
 }
 
+// GetEmployee fetches a single employee record by ID.
+// Add this method to internal/adapters/sqlite/repository.go
+// alongside DeleteEmployee.
+func (r *Repository) GetEmployee(ctx context.Context, id int64) (*domain.EmployeeRecord, error) {
+	e := &domain.EmployeeRecord{}
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, submission_id, ssn, original_ssn,
+		       first_name, middle_name, last_name, suffix,
+		       addr1, addr2, city, state, zip, zip_ext,
+		       orig_wages, corr_wages,
+		       orig_ss_wages, corr_ss_wages,
+		       orig_med_wages, corr_med_wages,
+		       orig_fed_tax, corr_fed_tax,
+		       orig_ss_tax, corr_ss_tax,
+		       orig_med_tax, corr_med_tax,
+		       orig_ss_tips, corr_ss_tips,
+		       created_at, updated_at
+		FROM employees WHERE id=?`, id).Scan(
+		&e.ID, &e.SubmissionID, &e.SSN, &e.OriginalSSN,
+		&e.FirstName, &e.MiddleName, &e.LastName, &e.Suffix,
+		&e.AddressLine1, &e.AddressLine2, &e.City, &e.State, &e.ZIP, &e.ZIPExtension,
+		&e.Amounts.OriginalWagesTipsOther, &e.Amounts.CorrectWagesTipsOther,
+		&e.Amounts.OriginalSocialSecurityWages, &e.Amounts.CorrectSocialSecurityWages,
+		&e.Amounts.OriginalMedicareWages, &e.Amounts.CorrectMedicareWages,
+		&e.Amounts.OriginalFederalIncomeTax, &e.Amounts.CorrectFederalIncomeTax,
+		&e.Amounts.OriginalSocialSecurityTax, &e.Amounts.CorrectSocialSecurityTax,
+		&e.Amounts.OriginalMedicareTax, &e.Amounts.CorrectMedicareTax,
+		&e.Amounts.OriginalSocialSecurityTips, &e.Amounts.CorrectSocialSecurityTips,
+		&e.CreatedAt, &e.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
 func (r *Repository) UpdateEmployee(ctx context.Context, e *domain.EmployeeRecord) error {
 	e.UpdatedAt = time.Now()
 	_, err := r.db.ExecContext(ctx, `
