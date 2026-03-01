@@ -32,7 +32,7 @@ func main() {
 		log.Fatalf("failed to open database: %v", err)
 	}
 
-	gen := efw2c.MustNew(2021)
+	gen := efw2c.MustNew(0) // 0 = use DefaultYear; Generate() resolves per-submission anyway
 	h := handlers.New(repo, gen)
 
 	log.Printf("W-2c EFW2C Generator running on http://localhost:%s", port)

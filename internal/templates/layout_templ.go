@@ -43,7 +43,7 @@ func Base(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap\" rel=\"stylesheet\"><script src=\"https://cdn.tailwindcss.com\"></script><script>\n\t\t\ttailwind.config = {\n\t\t\t\ttheme: {\n\t\t\t\t\textend: {\n\t\t\t\t\t\tcolors: {\n\t\t\t\t\t\t\tink:    '#0d1117',\n\t\t\t\t\t\t\tpaper:  '#f5f0e8',\n\t\t\t\t\t\t\tledger: '#e8e0cc',\n\t\t\t\t\t\t\taccent: '#c0392b',\n\t\t\t\t\t\t\taccent2:'#2c6e49',\n\t\t\t\t\t\t\tmuted:  '#6b5e4e',\n\t\t\t\t\t\t\trule:   '#b8a898',\n\t\t\t\t\t\t},\n\t\t\t\t\t\tfontFamily: {\n\t\t\t\t\t\t\tmono: ['\"IBM Plex Mono\"', 'monospace'],\n\t\t\t\t\t\t\tsans: ['\"IBM Plex Sans\"', 'sans-serif'],\n\t\t\t\t\t\t},\n\t\t\t\t\t},\n\t\t\t\t},\n\t\t\t}\n\t\t</script><style>\n\t\t\t/* Lined-paper background — not achievable with vanilla Tailwind */\n\t\t\tbody {\n\t\t\t\tbackground-color: #f5f0e8;\n\t\t\t\tbackground-image: repeating-linear-gradient(\n\t\t\t\t\t0deg, transparent, transparent 27px, #b8a898 27px, #b8a898 28px\n\t\t\t\t);\n\t\t\t}\n\n\t\t\t/* Stamp — needs arbitrary transform origin + precise rotation */\n\t\t\t.stamp {\n\t\t\t\tdisplay: inline-block;\n\t\t\t\tborder: 3px solid #c0392b;\n\t\t\t\tcolor: #c0392b;\n\t\t\t\tfont-family: 'IBM Plex Mono', monospace;\n\t\t\t\tfont-weight: 600;\n\t\t\t\tletter-spacing: 0.15em;\n\t\t\t\tpadding: 2px 10px;\n\t\t\t\ttransform: rotate(-2deg);\n\t\t\t\tfont-size: 0.7rem;\n\t\t\t\ttext-transform: uppercase;\n\t\t\t}\n\n\t\t\t/* Base form element styles applied globally */\n\t\t\tinput, select, textarea {\n\t\t\t\tbackground: white;\n\t\t\t\tborder: 1px solid #b8a898;\n\t\t\t\tborder-bottom: 2px solid #0d1117;\n\t\t\t\tpadding: 6px 8px;\n\t\t\t\tfont-family: 'IBM Plex Mono', monospace;\n\t\t\t\tfont-size: 0.85rem;\n\t\t\t\twidth: 100%;\n\t\t\t\toutline: none;\n\t\t\t\ttransition: border-color 0.15s;\n\t\t\t}\n\t\t\tinput:focus, select:focus, textarea:focus {\n\t\t\t\tborder-bottom-color: #c0392b;\n\t\t\t}\n\t\t\tinput:disabled {\n\t\t\t\tbackground: #e8e0cc;\n\t\t\t\tcursor: not-allowed;\n\t\t\t}\n\t\t</style></head><body class=\"text-ink font-sans min-h-screen\"><div class=\"max-w-[1100px] mx-auto px-6 py-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap\" rel=\"stylesheet\"><script src=\"https://cdn.tailwindcss.com\"></script><script>\n\t\t\ttailwind.config = {\n\t\t\t\ttheme: {\n\t\t\t\t\textend: {\n\t\t\t\t\t\tcolors: {\n\t\t\t\t\t\t\tink:     '#0d1117',\n\t\t\t\t\t\t\tpaper:   '#f5f0e8',\n\t\t\t\t\t\t\tledger:  '#e8e0cc',\n\t\t\t\t\t\t\taccent:  '#c0392b',\n\t\t\t\t\t\t\taccent2: '#2c6e49',\n\t\t\t\t\t\t\tmuted:   '#6b5e4e',\n\t\t\t\t\t\t\trule:    '#b8a898',\n\t\t\t\t\t\t},\n\t\t\t\t\t\tfontFamily: {\n\t\t\t\t\t\t\tmono: ['\"IBM Plex Mono\"', 'monospace'],\n\t\t\t\t\t\t\tsans: ['\"IBM Plex Sans\"', 'sans-serif'],\n\t\t\t\t\t\t},\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script><style>\n\t\t\t* { box-sizing: border-box; }\n\t\t\tbody {\n\t\t\t\tbackground-color: #f5f0e8;\n\t\t\t\tcolor: #0d1117;\n\t\t\t\tfont-family: 'IBM Plex Sans', sans-serif;\n\t\t\t\tbackground-image: repeating-linear-gradient(\n\t\t\t\t\t0deg, transparent, transparent 27px, #b8a898 27px, #b8a898 28px\n\t\t\t\t);\n\t\t\t\tmin-height: 100vh;\n\t\t\t}\n\t\t\t.stamp {\n\t\t\t\tdisplay: inline-block;\n\t\t\t\tborder: 3px solid #c0392b;\n\t\t\t\tcolor: #c0392b;\n\t\t\t\tfont-family: 'IBM Plex Mono', monospace;\n\t\t\t\tfont-weight: 600;\n\t\t\t\tletter-spacing: 0.15em;\n\t\t\t\tpadding: 2px 10px;\n\t\t\t\ttransform: rotate(-2deg);\n\t\t\t\tfont-size: 0.7rem;\n\t\t\t}\n\t\t\tinput, select, textarea {\n\t\t\t\tbackground: white;\n\t\t\t\tborder: 1px solid #b8a898;\n\t\t\t\tborder-bottom: 2px solid #0d1117;\n\t\t\t\tpadding: 6px 8px;\n\t\t\t\tfont-family: 'IBM Plex Mono', monospace;\n\t\t\t\tfont-size: 0.85rem;\n\t\t\t\twidth: 100%;\n\t\t\t\toutline: none;\n\t\t\t\ttransition: border-color 0.15s;\n\t\t\t}\n\t\t\tinput:focus, select:focus, textarea:focus { border-bottom-color: #c0392b; }\n\t\t\tinput:disabled, select:disabled { background: #e8e0cc; cursor: not-allowed; }\n\t\t</style></head><body><div style=\"max-width:1100px;margin:0 auto;padding:32px 24px;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +51,7 @@ func Base(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mt-12 pt-4 border-t border-rule font-mono text-[0.6rem] text-muted text-center\">W-2c EFW2C GENERATOR · FOR INTERNAL USE · TAX YEAR 2021 ONLY</div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mt-12 pt-4 border-t border-rule font-mono text-[0.6rem] text-muted text-center\">W-2c EFW2C GENERATOR · FOR INTERNAL USE · SSA PUB. 42-014</div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,7 +59,7 @@ func Base(title string) templ.Component {
 	})
 }
 
-// PageHeader renders the IRS/SSA branding header used on every page.
+// PageHeader renders the IRS/SSA branding header used on the index page.
 func PageHeader() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -81,7 +81,139 @@ func PageHeader() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex items-start justify-between mb-8\"><div><div class=\"font-mono text-[0.65rem] tracking-[0.2em] text-muted mb-1\">INTERNAL REVENUE SERVICE · SOCIAL SECURITY ADMINISTRATION</div><h1 class=\"font-mono text-[1.6rem] font-semibold tracking-tight m-0\">W&#8209;2c Correction Generator</h1><div class=\"text-[0.85rem] text-muted mt-1\">EFW2C Fixed-Width Submission Format · Tax Year <strong>2021</strong></div></div><div class=\"text-right\"><div class=\"stamp\">TY 2021</div><div class=\"font-mono text-[0.65rem] text-muted mt-2\">SSA Pub. 42-007</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex items-start justify-between mb-8\"><div><div class=\"font-mono text-[0.65rem] tracking-[0.2em] text-muted mb-1\">INTERNAL REVENUE SERVICE · SOCIAL SECURITY ADMINISTRATION</div><h1 class=\"font-mono text-[1.6rem] font-semibold tracking-tight m-0\">W&#8209;2c Correction Generator</h1><div class=\"text-[0.85rem] text-muted mt-1\">EFW2C Fixed-Width Submission Format · SSA Pub. 42-014</div></div><div class=\"text-right\"><div class=\"stamp\">EFW2C</div><div class=\"font-mono text-[0.65rem] text-muted mt-2\">SSA Pub. 42-014</div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// SectionHeader renders a labelled section divider, with an optional sub-label.
+func SectionHeader(label, sub string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 mb-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 109, Col: 9}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if sub != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"font-normal text-[0.6rem] ml-2\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(sub)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 111, Col: 53}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// FieldLabel renders a small all-caps label above an input.
+func FieldLabel(label, sub string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<label class=\"font-mono text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted block mb-0.5\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 119, Col: 9}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if sub != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"font-normal\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(" " + sub)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 121, Col: 40}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</label>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

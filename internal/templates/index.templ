@@ -2,8 +2,8 @@ package templates
 
 import "github.com/csg33k/w2c-generator/internal/domain"
 
-templ Index(submissions []domain.Submission) {
-	@Base("W-2c EFW2C Generator · Tax Year 2021") {
+templ Index(submissions []domain.Submission, taxYears []domain.TaxYearInfo) {
+	@Base("W-2c EFW2C Generator") {
 		@PageHeader()
 		<div class="grid grid-cols-2 gap-8 items-start">
 
@@ -12,9 +12,8 @@ templ Index(submissions []domain.Submission) {
 				@SectionHeader("New Submission", "")
 				<form hx-post="/submissions" hx-target="body" hx-push-url="true">
 
-					<!-- BSO Submitter Info -->
-					@SectionHeader("BSO Submitter Info", "required by AccuWage")
-					<div class="grid gap-2.5">
+					@SectionHeader("BSO Submitter Info", "RCA record")
+					<div class="grid gap-2.5 mb-5">
 						<div class="grid grid-cols-2 gap-2">
 							<div>
 								@FieldLabel("BSO User ID *", "(8 chars)")
@@ -32,7 +31,7 @@ templ Index(submissions []domain.Submission) {
 							</div>
 						</div>
 						<div>
-							@FieldLabel("Contact Name *", "(letters, numbers, space, - .)")
+							@FieldLabel("Contact Name *", "")
 							<input type="text" name="contact_name" placeholder="JANE SMITH" required maxlength="27"/>
 						</div>
 						<div class="grid grid-cols-2 gap-2">
@@ -49,17 +48,25 @@ templ Index(submissions []domain.Submission) {
 
 					<hr class="border-0 border-t-2 border-ink my-5"/>
 
-					<!-- Employer Info -->
-					@SectionHeader("Employer Information", "")
-					<div class="grid gap-2.5">
+					@SectionHeader("Employer Information", "RCE record")
+					<div class="grid gap-2.5 mb-5">
 						<div class="grid grid-cols-2 gap-2">
 							<div>
 								@FieldLabel("Employer EIN *", "")
 								<input type="text" name="ein" placeholder="12-3456789" required maxlength="10" class="font-mono"/>
 							</div>
 							<div>
-								@FieldLabel("Tax Year", "")
-								<input type="text" value="2021" disabled class="font-mono"/>
+								@FieldLabel("Tax Year *", "")
+								<select name="tax_year">
+									for i, ty := range taxYears {
+										<option value={ ty.Year } selected?={ i == len(taxYears)-1 }>{ ty.Year }</option>
+									}
+								</select>
+								<div class="flex gap-3 mt-1">
+									for _, ty := range taxYears {
+										<a href={ templ.SafeURL(ty.PublicationURL) } target="_blank" class="font-mono text-[0.6rem] text-muted hover:text-accent transition-colors">{ ty.Year } ↗</a>
+									}
+								</div>
 							</div>
 						</div>
 						<div>
@@ -68,24 +75,24 @@ templ Index(submissions []domain.Submission) {
 						</div>
 						<div>
 							@FieldLabel("Address Line 1", "")
-							<input type="text" name="addr1" placeholder="123 MAIN ST" maxlength="40"/>
+							<input type="text" name="emp_addr1" placeholder="123 MAIN ST" maxlength="40"/>
 						</div>
 						<div>
 							@FieldLabel("Address Line 2", "")
-							<input type="text" name="addr2" placeholder="SUITE 400" maxlength="40"/>
+							<input type="text" name="emp_addr2" placeholder="SUITE 400" maxlength="40"/>
 						</div>
 						<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
 							<div>
 								@FieldLabel("City", "")
-								<input type="text" name="city" placeholder="SPRINGFIELD" maxlength="39"/>
+								<input type="text" name="emp_city" placeholder="SPRINGFIELD" maxlength="39"/>
 							</div>
 							<div>
 								@FieldLabel("State", "")
-								<input type="text" name="state" placeholder="IL" maxlength="2" class="font-mono"/>
+								<input type="text" name="emp_state" placeholder="IL" maxlength="2" class="font-mono"/>
 							</div>
 							<div>
 								@FieldLabel("ZIP", "")
-								<input type="text" name="zip" placeholder="62701" maxlength="5" class="font-mono"/>
+								<input type="text" name="emp_zip" placeholder="62701" maxlength="5" class="font-mono"/>
 							</div>
 						</div>
 						<div class="grid grid-cols-2 gap-2">
@@ -116,9 +123,8 @@ templ Index(submissions []domain.Submission) {
 
 					<hr class="border-0 border-t-2 border-ink my-5"/>
 
-					<!-- Employer Contact (RCE) -->
 					@SectionHeader("Employer Contact", "RCE record")
-					<div class="grid gap-2.5">
+					<div class="grid gap-2.5 mb-5">
 						<div>
 							@FieldLabel("Employer Contact Name *", "")
 							<input type="text" name="employer_contact_name" placeholder="JOHN DOE" required maxlength="27"/>
@@ -136,13 +142,14 @@ templ Index(submissions []domain.Submission) {
 					</div>
 
 					<hr class="border-0 border-t-2 border-ink my-5"/>
+
 					<div>
 						@FieldLabel("Notes (internal)", "")
 						<textarea name="notes" rows="2" class="resize-y" placeholder="Optional internal notes..."></textarea>
 					</div>
 					<div class="mt-4 flex justify-end">
 						<button type="submit" class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent">
-							CREATE SUBMISSION →
+							CREATE SUBMISSION
 						</button>
 					</div>
 				</form>
@@ -157,7 +164,6 @@ templ Index(submissions []domain.Submission) {
 	}
 }
 
-
 templ SubmissionList(submissions []domain.Submission) {
 	if len(submissions) == 0 {
 		<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-5 text-center font-mono text-[0.8rem] text-muted">
@@ -166,14 +172,16 @@ templ SubmissionList(submissions []domain.Submission) {
 	} else {
 		for _, s := range submissions {
 			<div
-				class="bg-white/70 border border-ledger border-l-4 border-l-ink px-5 py-4 mb-2.5 cursor-pointer hover:border-l-accent transition-colors duration-150"
+				class="bg-white/70 border border-ledger border-l-4 border-l-ink px-5 py-4 mb-2.5 cursor-pointer hover:border-l-accent transition-colors"
 				hx-get={ "/submissions/" + itoa(s.ID) }
 				hx-target="body"
 				hx-push-url="true"
 			>
 				<div class="font-mono font-semibold">{ s.Employer.Name }</div>
 				<div class="text-[0.75rem] text-muted mt-1">
-					EIN: <span class="font-mono">{ s.Employer.EIN }</span> · { s.CreatedAt.Format("2006-01-02") }
+					EIN: <span class="font-mono">{ s.Employer.EIN }</span>
+					&#183; TY <span class="font-mono">{ s.Employer.TaxYear }</span>
+					&#183; { s.CreatedAt.Format("2006-01-02") }
 				</div>
 				if s.Notes != "" {
 					<div class="text-[0.75rem] text-muted mt-1 italic">{ s.Notes }</div>
@@ -181,24 +189,4 @@ templ SubmissionList(submissions []domain.Submission) {
 			</div>
 		}
 	}
-}
-
-// SectionHeader renders a labeled section divider with an optional muted subtitle.
-templ SectionHeader(label, sub string) {
-	<div class="font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 mb-4">
-		{ label }
-		if sub != "" {
-			<span class="font-normal text-[0.6rem] text-muted ml-2">{ sub }</span>
-		}
-	</div>
-}
-
-// FieldLabel renders a styled label with an optional hint in normal weight.
-templ FieldLabel(label, hint string) {
-	<label class="font-mono text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-muted block mb-0.5">
-		{ label }
-		if hint != "" {
-			<span class="font-normal normal-case">{ hint }</span>
-		}
-	</label>
 }

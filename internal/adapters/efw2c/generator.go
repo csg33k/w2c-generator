@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -36,11 +37,32 @@ func MustNew(year int) *Generator {
 func (g *Generator) Year() int            { return g.year }
 func (g *Generator) Spec() *spec.YearSpec { return g.yspec }
 
+// SupportedYears returns all tax years this generator supports, ascending,
+// each paired with its SSA publication URL. Satisfies ports.EFW2CGenerator.
+func (g *Generator) SupportedYears() []domain.TaxYearInfo {
+	years := spec.Supported() // already ascending
+	out := make([]domain.TaxYearInfo, len(years))
+	for i, y := range years {
+		ys, _ := spec.ForYear(y)
+		out[i] = domain.TaxYearInfo{
+			Year:           strconv.Itoa(y),
+			PublicationURL: ys.PublicationURL,
+		}
+	}
+	return out
+}
+
 // Generate writes a complete EFW2C byte stream (no CR/LF between records).
 func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Writer) error {
+	// Resolve the correct spec for this submission's tax year.
+	// Falls back to DefaultYear if the year is unrecognised.
+	yearInt, _ := strconv.Atoi(s.Employer.TaxYear)
+	yspec, _ := spec.ForYear(yearInt)
+	local := &Generator{year: yearInt, yspec: yspec}
+
 	records := []string{
-		g.buildRCA(s),
-		g.buildRCE(s),
+		local.buildRCA(s),
+		local.buildRCE(s),
 	}
 
 	var (
@@ -54,7 +76,7 @@ func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Wri
 	)
 	for i := range s.Employees {
 		e := &s.Employees[i]
-		records = append(records, g.buildRCW(e))
+		records = append(records, local.buildRCW(e))
 		origWages += e.Amounts.OriginalWagesTipsOther
 		corrWages += e.Amounts.CorrectWagesTipsOther
 		origFed += e.Amounts.OriginalFederalIncomeTax
@@ -71,10 +93,10 @@ func (g *Generator) Generate(ctx context.Context, s *domain.Submission, w io.Wri
 		corrSSTips += e.Amounts.CorrectSocialSecurityTips
 	}
 	records = append(records,
-		g.buildRCT(origWages, corrWages, origFed, corrFed, origSS, corrSS,
+		local.buildRCT(origWages, corrWages, origFed, corrFed, origSS, corrSS,
 			origSSTax, corrSSTax, origMed, corrMed, origMedTax, corrMedTax,
 			origSSTips, corrSSTips),
-		g.buildRCF(len(s.Employees)),
+		local.buildRCF(len(s.Employees)),
 	)
 
 	for _, r := range records {

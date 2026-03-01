@@ -2,16 +2,20 @@ package domain
 
 import "time"
 
-const TaxYear2021 = "2021"
+const DefaultTaxYear = "2024"
+
+// TaxYearInfo carries a supported tax year string and its SSA publication URL.
+// Populated by the generator port so templates can build selects with spec links.
+type TaxYearInfo struct {
+	Year           string // e.g. "2024"
+	PublicationURL string // e.g. "https://www.ssa.gov/employer/efw/24efw2c.pdf"
+}
 
 // SubmitterInfo holds the RCA (Submitter) record fields.
-// These are separate from the employer — the submitter is whoever is sending
-// the file to SSA (payroll bureau, accounting firm, or the employer itself).
 type SubmitterInfo struct {
 	// BSOUID is the 8-char BSO User ID from SSA registration (required).
 	// Obtain at: https://www.ssa.gov/employer/
 	BSOUID string
-
 	// ContactName is the human contact at the submitter.
 	// Allowed chars: A-Z, 0-9, space, hyphen, period, apostrophe.
 	ContactName string
@@ -43,7 +47,7 @@ type EmployerRecord struct {
 	State               string
 	ZIP                 string
 	ZIPExtension        string
-	TaxYear             string
+	TaxYear             string // e.g. "2024" — written into RCE record
 	AgentIndicator      string
 	AgentEIN            string
 	TerminatingBusiness bool

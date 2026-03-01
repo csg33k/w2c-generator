@@ -15,7 +15,7 @@ CREATE TABLE submissions (
                                            notes            TEXT    NOT NULL DEFAULT '',
                                            created_at       DATETIME NOT NULL,
                                            submitted_at     DATETIME
-, bso_uid          TEXT NOT NULL DEFAULT '', contact_name     TEXT NOT NULL DEFAULT '', contact_phone    TEXT NOT NULL DEFAULT '', contact_email    TEXT NOT NULL DEFAULT '', preparer_code    TEXT NOT NULL DEFAULT 'L', kind_of_employer       TEXT NOT NULL DEFAULT 'N', employer_contact_name  TEXT NOT NULL DEFAULT '', employer_contact_phone TEXT NOT NULL DEFAULT '', employer_contact_email TEXT NOT NULL DEFAULT '', employment_code        TEXT NOT NULL DEFAULT 'R');
+, bso_uid          TEXT NOT NULL DEFAULT '', contact_name     TEXT NOT NULL DEFAULT '', contact_phone    TEXT NOT NULL DEFAULT '', contact_email    TEXT NOT NULL DEFAULT '', preparer_code    TEXT NOT NULL DEFAULT 'L', kind_of_employer       TEXT NOT NULL DEFAULT 'N', employer_contact_name  TEXT NOT NULL DEFAULT '', employer_contact_phone TEXT NOT NULL DEFAULT '', employer_contact_email TEXT NOT NULL DEFAULT '', employment_code        TEXT NOT NULL DEFAULT 'R', tax_year TEXT NOT NULL DEFAULT '2021');
 CREATE TABLE employees (
                                          id             INTEGER PRIMARY KEY AUTOINCREMENT,
                                          submission_id  INTEGER NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
@@ -49,4 +49,5 @@ CREATE TABLE employees (
 -- Dbmate schema migrations
 INSERT INTO "schema_migrations" (version) VALUES
   ('20260228000001'),
-  ('20260228000002');
+  ('20260228000002'),
+  ('20260301170046');

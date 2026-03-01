@@ -3,7 +3,7 @@ package templates
 import "github.com/csg33k/w2c-generator/internal/domain"
 
 // SubmissionEditForm is the inline edit form that replaces SubmissionHeader via HTMX outerHTML swap.
-templ SubmissionEditForm(s *domain.Submission) {
+templ SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) {
 	<div id="submission-header" class="mb-6 bg-white/70 border border-ledger border-l-4 border-l-accent p-6">
 		@SectionHeader("Editing: "+s.Employer.Name, "")
 		<form
@@ -57,8 +57,17 @@ templ SubmissionEditForm(s *domain.Submission) {
 						<input type="text" name="ein" value={ s.Employer.EIN } required maxlength="10" class="font-mono"/>
 					</div>
 					<div>
-						@FieldLabel("Tax Year", "")
-						<input type="text" value="2021" disabled class="font-mono"/>
+						@FieldLabel("Tax Year *", "")
+						<select name="tax_year">
+							for _, ty := range taxYears {
+								<option value={ ty.Year } selected?={ ty.Year == s.Employer.TaxYear }>{ ty.Year }</option>
+							}
+						</select>
+						<div class="flex gap-3 mt-1">
+							for _, ty := range taxYears {
+								<a href={ templ.SafeURL(ty.PublicationURL) } target="_blank" class="font-mono text-[0.6rem] text-muted hover:text-accent transition-colors">{ ty.Year } spec</a>
+							}
+						</div>
 					</div>
 				</div>
 				<div>

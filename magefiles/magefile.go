@@ -2,16 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
 const templDir = "./internal/templates"
+
+// Dbup runs dbmate to apply db migrations
+func Dbup() error {
+	if _, err := exec.LookPath("dbmate"); err != nil {
+		fmt.Println(">> dbmate not found; install with:")
+		fmt.Println("   go install https://github.com/amacneil/dbmate@latest")
+		return err
+	}
+	fmt.Println(">> dbmate up")
+	return sh.Run("dbmate", "up")
+}
 
 // Generate runs templ generate targeting the templates directory.
 // This must be run before Build or Dev any time a .templ file changes.
@@ -127,4 +140,11 @@ func Clean() error {
 func Install() error {
 	mg.Deps(Build)
 	return sh.Run("go", "install", "./cmd/server")
+}
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		slog.Warn("error loading .env file", "err", err)
+	}
 }

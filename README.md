@@ -42,7 +42,7 @@ w2c-generator/
 ```
 
 ## Prerequisites
-## Prerequisites
+
 ```bash
 +# dbmate (DB migrations)
 +brew install dbmate          # macOS

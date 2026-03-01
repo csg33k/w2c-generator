@@ -48,7 +48,7 @@ func (h *Handler) index(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	render(w, r, templates.Index(submissions))
+	render(w, r, templates.Index(submissions, h.gen.SupportedYears()))
 }
 
 func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
@@ -79,9 +79,14 @@ func (h *Handler) createSubmission(w http.ResponseWriter, r *http.Request) {
 			ZIP:            r.FormValue("emp_zip"),
 			ZIPExtension:   r.FormValue("emp_zip_ext"),
 			AgentIndicator: "0",
-			TaxYear:        domain.TaxYear2021,
+			TaxYear:        r.FormValue("tax_year"),
 		},
 		Notes: r.FormValue("notes"),
+	}
+	// Validate: if the submitted year isn't supported, fall back to default.
+	if s.Employer.TaxYear == "" {
+		supported := h.gen.SupportedYears()
+		s.Employer.TaxYear = supported[len(supported)-1].Year
 	}
 	if err := h.repo.CreateSubmission(r.Context(), s); err != nil {
 		http.Error(w, err.Error(), 500)
@@ -117,7 +122,7 @@ func (h *Handler) editSubmissionForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	render(w, r, templates.SubmissionEditForm(s))
+	render(w, r, templates.SubmissionEditForm(s, h.gen.SupportedYears()))
 }
 
 // getSubmissionHeader renders the read-only submission header fragment (used by cancel).
@@ -170,7 +175,12 @@ func (h *Handler) updateSubmission(w http.ResponseWriter, r *http.Request) {
 	s.Employer.ContactName = r.FormValue("employer_contact_name")
 	s.Employer.ContactPhone = stripNonDigits(r.FormValue("employer_contact_phone"))
 	s.Employer.ContactEmail = r.FormValue("employer_contact_email")
+	s.Employer.TaxYear = r.FormValue("tax_year")
 	s.Notes = r.FormValue("notes")
+	if s.Employer.TaxYear == "" {
+		supported := h.gen.SupportedYears()
+		s.Employer.TaxYear = supported[len(supported)-1].Year
+	}
 	if err := h.repo.UpdateSubmission(r.Context(), s); err != nil {
 		http.Error(w, err.Error(), 500)
 		return

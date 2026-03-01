@@ -35,8 +35,8 @@ func (r *Repository) CreateSubmission(ctx context.Context, s *domain.Submission)
 			bso_uid, contact_name, contact_phone, contact_email, preparer_code,
 			employment_code, kind_of_employer,
 			employer_contact_name, employer_contact_phone, employer_contact_email,
-			created_at
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		    created_at, tax_year
+	    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		s.Employer.EIN, s.Employer.Name,
 		s.Employer.AddressLine1, s.Employer.AddressLine2,
 		s.Employer.City, s.Employer.State, s.Employer.ZIP, s.Employer.ZIPExtension,
@@ -47,7 +47,7 @@ func (r *Repository) CreateSubmission(ctx context.Context, s *domain.Submission)
 		s.Submitter.ContactPhone, s.Submitter.ContactEmail, s.Submitter.PreparerCode,
 		s.Employer.EmploymentCode, s.Employer.KindOfEmployer,
 		s.Employer.ContactName, s.Employer.ContactPhone, s.Employer.ContactEmail,
-		s.CreatedAt,
+		s.CreatedAt, s.Employer.TaxYear,
 	)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 		       bso_uid, contact_name, contact_phone, contact_email, preparer_code,
 		       employment_code, kind_of_employer,
 		       employer_contact_name, employer_contact_phone, employer_contact_email,
-		       created_at, submitted_at
+		       created_at, submitted_at, tax_year
 		FROM submissions WHERE id=?`, id).Scan(
 		&s.ID, &s.Employer.EIN, &s.Employer.Name,
 		&s.Employer.AddressLine1, &s.Employer.AddressLine2,
@@ -78,13 +78,17 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 		&s.Submitter.ContactPhone, &s.Submitter.ContactEmail, &s.Submitter.PreparerCode,
 		&s.Employer.EmploymentCode, &s.Employer.KindOfEmployer,
 		&s.Employer.ContactName, &s.Employer.ContactPhone, &s.Employer.ContactEmail,
-		&s.CreatedAt, &submittedAt,
+		&s.CreatedAt, &submittedAt, &s.Employer.TaxYear,
 	)
 	if err != nil {
 		return nil, err
 	}
 	s.Employer.TerminatingBusiness = terminating == 1
-	s.Employer.TaxYear = domain.TaxYear2021
+	// TaxYear is now persisted; only fall back if the column was empty
+	// (e.g. rows created before migration 0003).
+	if s.Employer.TaxYear == "" {
+		s.Employer.TaxYear = domain.DefaultTaxYear
+	}
 	if submittedAt.Valid {
 		s.SubmittedAt = &submittedAt.Time
 	}
@@ -154,8 +158,9 @@ func (r *Repository) UpdateSubmission(ctx context.Context, s *domain.Submission)
 		    agent_indicator=?, agent_ein=?, terminating=?, notes=?,
 		    bso_uid=?, contact_name=?, contact_phone=?, contact_email=?, preparer_code=?,
 		    employment_code=?, kind_of_employer=?,
-		    employer_contact_name=?, employer_contact_phone=?, employer_contact_email=?
-		WHERE id=?`,
+		    employer_contact_name=?, employer_contact_phone=?, employer_contact_email=?,
+		    tax_year=?
+        WHERE id=?`,
 		s.Employer.EIN, s.Employer.Name,
 		s.Employer.AddressLine1, s.Employer.AddressLine2,
 		s.Employer.City, s.Employer.State, s.Employer.ZIP, s.Employer.ZIPExtension,
@@ -166,7 +171,7 @@ func (r *Repository) UpdateSubmission(ctx context.Context, s *domain.Submission)
 		s.Submitter.ContactPhone, s.Submitter.ContactEmail, s.Submitter.PreparerCode,
 		s.Employer.EmploymentCode, s.Employer.KindOfEmployer,
 		s.Employer.ContactName, s.Employer.ContactPhone, s.Employer.ContactEmail,
-		s.ID,
+		s.Employer.TaxYear, s.ID,
 	)
 	return err
 }

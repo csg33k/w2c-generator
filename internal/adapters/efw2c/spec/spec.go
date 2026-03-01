@@ -37,7 +37,7 @@ type YearSpec struct {
 	RCF            []Field
 }
 
-const DefaultYear = 2021
+const DefaultYear = 2024
 
 func Supported() []int { return []int{2021, 2022, 2023, 2024} }
 
