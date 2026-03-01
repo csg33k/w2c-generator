@@ -112,7 +112,7 @@ func (g *Generator) buildRCA(s *domain.Submission) string {
 	b.put("CompanyName", g.yspec.RCA, padAlpha(s.Employer.Name, 35))
 	b.put("LocationAddress", g.yspec.RCA, padAlpha(s.Employer.AddressLine1, 40))
 	b.put("DeliveryAddress", g.yspec.RCA, padAlpha(s.Employer.AddressLine2, 40))
-	b.put("City", g.yspec.RCA, padAlpha(s.Employer.City, 22))
+	//b.put("City", g.yspec.RCA, padAlpha(s.Employer.City, 22))
 	b.put("StateAbbrev", g.yspec.RCA, padAlpha(s.Employer.State, 2))
 	b.put("ZIPCode", g.yspec.RCA, padNumeric(s.Employer.ZIP, 5))
 	b.put("ZIPExtension", g.yspec.RCA, padNumeric(s.Employer.ZIPExtension, 4))
@@ -137,9 +137,8 @@ func (g *Generator) buildRCE(s *domain.Submission) string {
 	b.put("AgentForEIN", g.yspec.RCE, padNumeric(s.Employer.AgentEIN, 9))
 	b.put("AgentIndicatorCode", g.yspec.RCE, defaultStr(s.Employer.AgentIndicator, "0"))
 	b.put("TerminatingBusiness", g.yspec.RCE, boolChar(s.Employer.TerminatingBusiness))
-	//b.put("EmploymentCode", g.yspec.RCE, "R")
 	b.put("EmploymentCode", g.yspec.RCE, defaultStr(s.Employer.EmploymentCode, "R"))
-	b.put("KindOfEmployer", g.yspec.RCE, defaultStr(s.Employer.KindOfEmployer, "N"))
+	//b.put("KindOfEmployer", g.yspec.RCE, defaultStr(s.Employer.KindOfEmployer, "N"))
 	b.put("EmployerName", g.yspec.RCE, padAlpha(s.Employer.Name, 35))
 	b.put("LocationAddress", g.yspec.RCE, padAlpha(s.Employer.AddressLine1, 40))
 	b.put("DeliveryAddress", g.yspec.RCE, padAlpha(s.Employer.AddressLine2, 40))
@@ -241,7 +240,7 @@ func (b *fixedBuf) put(fieldName string, fields []spec.Field, value string) {
 			if len(value) > width {
 				value = value[:width]
 			}
-			copy(b.data[f.Start-1:f.End], []byte(value))
+			copy(b.data[f.Start-1:f.End], value)
 			return
 		}
 	}
