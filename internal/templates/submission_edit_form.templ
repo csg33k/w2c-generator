@@ -1,0 +1,163 @@
+package templates
+
+import "github.com/csg33k/w2c-generator/internal/domain"
+
+// SubmissionEditForm is the inline edit form that replaces SubmissionHeader via HTMX outerHTML swap.
+templ SubmissionEditForm(s *domain.Submission) {
+	<div id="submission-header" class="mb-6 bg-white/70 border border-ledger border-l-4 border-l-accent p-6">
+		@SectionHeader("Editing: "+s.Employer.Name, "")
+		<form
+			hx-put={ "/submissions/" + itoa(s.ID) }
+			hx-target="#submission-header"
+			hx-swap="outerHTML"
+		>
+			<!-- BSO Submitter -->
+			@SectionHeader("BSO Submitter Info", "RCA record")
+			<div class="grid gap-2.5 mb-5">
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("BSO User ID *", "(8 chars)")
+						<input type="text" name="bso_uid" value={ s.Submitter.BSOUID } required maxlength="8" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("Preparer Code", "")
+						<select name="preparer_code">
+							<option value="L" selected?={ s.Submitter.PreparerCode == "L" }>L - Self-Prepared</option>
+							<option value="A" selected?={ s.Submitter.PreparerCode == "A" }>A - Accounting Firm</option>
+							<option value="S" selected?={ s.Submitter.PreparerCode == "S" }>S - Service Bureau</option>
+							<option value="P" selected?={ s.Submitter.PreparerCode == "P" }>P - Parent Company</option>
+							<option value="O" selected?={ s.Submitter.PreparerCode == "O" }>O - Other</option>
+						</select>
+					</div>
+				</div>
+				<div>
+					@FieldLabel("Contact Name *", "")
+					<input type="text" name="contact_name" value={ s.Submitter.ContactName } required maxlength="27"/>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("Contact Phone *", "(digits only)")
+						<input type="tel" name="contact_phone" value={ s.Submitter.ContactPhone } required maxlength="15" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("Contact Email *", "")
+						<input type="email" name="contact_email" value={ s.Submitter.ContactEmail } required maxlength="40"/>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			<!-- Employer Info -->
+			@SectionHeader("Employer Information", "RCE record")
+			<div class="grid gap-2.5 mb-5">
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("Employer EIN *", "")
+						<input type="text" name="ein" value={ s.Employer.EIN } required maxlength="10" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("Tax Year", "")
+						<input type="text" value="2021" disabled class="font-mono"/>
+					</div>
+				</div>
+				<div>
+					@FieldLabel("Employer Name *", "")
+					<input type="text" name="employer_name" value={ s.Employer.Name } required maxlength="35"/>
+				</div>
+				<div>
+					@FieldLabel("Address Line 1", "")
+					<input type="text" name="emp_addr1" value={ s.Employer.AddressLine1 } maxlength="40"/>
+				</div>
+				<div>
+					@FieldLabel("Address Line 2", "")
+					<input type="text" name="emp_addr2" value={ s.Employer.AddressLine2 } maxlength="40"/>
+				</div>
+				<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
+					<div>
+						@FieldLabel("City", "")
+						<input type="text" name="emp_city" value={ s.Employer.City } maxlength="39"/>
+					</div>
+					<div>
+						@FieldLabel("State", "")
+						<input type="text" name="emp_state" value={ s.Employer.State } maxlength="2" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("ZIP", "")
+						<input type="text" name="emp_zip" value={ s.Employer.ZIP } maxlength="5" class="font-mono"/>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("Employment Code *", "")
+						<select name="employment_code">
+							<option value="R" selected?={ s.Employer.EmploymentCode == "R" }>R - Regular</option>
+							<option value="A" selected?={ s.Employer.EmploymentCode == "A" }>A - Agriculture</option>
+							<option value="H" selected?={ s.Employer.EmploymentCode == "H" }>H - Household</option>
+							<option value="M" selected?={ s.Employer.EmploymentCode == "M" }>M - Military</option>
+							<option value="Q" selected?={ s.Employer.EmploymentCode == "Q" }>Q - Medicare Govt.</option>
+							<option value="X" selected?={ s.Employer.EmploymentCode == "X" }>X - Railroad</option>
+							<option value="F" selected?={ s.Employer.EmploymentCode == "F" }>F - 944 Filer</option>
+						</select>
+					</div>
+					<div>
+						@FieldLabel("Kind of Employer *", "")
+						<select name="kind_of_employer">
+							<option value="N" selected?={ s.Employer.KindOfEmployer == "N" }>N - None Apply</option>
+							<option value="F" selected?={ s.Employer.KindOfEmployer == "F" }>F - Federal Govt.</option>
+							<option value="S" selected?={ s.Employer.KindOfEmployer == "S" }>S - State/Local 501c</option>
+							<option value="T" selected?={ s.Employer.KindOfEmployer == "T" }>T - 501c Non-Govt.</option>
+							<option value="Y" selected?={ s.Employer.KindOfEmployer == "Y" }>Y - State/Local Non-501c</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			<!-- Employer Contact -->
+			@SectionHeader("Employer Contact", "RCE record")
+			<div class="grid gap-2.5 mb-5">
+				<div>
+					@FieldLabel("Employer Contact Name *", "")
+					<input type="text" name="employer_contact_name" value={ s.Employer.ContactName } required maxlength="27"/>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("Employer Contact Phone *", "(digits only)")
+						<input type="tel" name="employer_contact_phone" value={ s.Employer.ContactPhone } required maxlength="15" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("Employer Contact Email *", "")
+						<input type="email" name="employer_contact_email" value={ s.Employer.ContactEmail } required maxlength="40"/>
+					</div>
+				</div>
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			<div>
+				@FieldLabel("Notes (internal)", "")
+				<textarea name="notes" rows="2" class="resize-y">{ s.Notes }</textarea>
+			</div>
+
+			<div class="mt-4 flex justify-end gap-2">
+				<button
+					type="button"
+					class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-muted border-rule hover:border-ink hover:text-ink"
+					hx-get={ "/submissions/" + itoa(s.ID) + "/header" }
+					hx-target="#submission-header"
+					hx-swap="outerHTML"
+				>
+					CANCEL
+				</button>
+				<button
+					type="submit"
+					class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent"
+				>
+					SAVE CHANGES
+				</button>
+			</div>
+		</form>
+	</div>
+}

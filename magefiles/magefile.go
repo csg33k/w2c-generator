@@ -22,7 +22,7 @@ func Generate() error {
 		return err
 	}
 	fmt.Println(">> templ generate", templDir)
-	return sh.Run("templ", "generate", "-f", templDir)
+	return sh.Run("templ", "generate", templDir)
 }
 
 // Build generates templ output, tidies deps, then compiles to ./bin/w2c-server.

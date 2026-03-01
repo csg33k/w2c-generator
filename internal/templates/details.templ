@@ -11,15 +11,60 @@ templ Detail(s *domain.Submission) {
 			<div class="stamp">TY 2021</div>
 		</div>
 
-		<!-- Submission header -->
-		<div class="flex justify-between items-start mb-6">
+		@SubmissionHeader(s)
+
+		<div class="grid grid-cols-[400px_1fr] gap-7 items-start">
+			@AddEmployeeForm(s.ID)
+			<div>
+				<div class="font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 mb-4">
+					Employee Corrections ({ itoa(int64(len(s.Employees))) })
+				</div>
+				<div id="employee-list">
+					@EmployeeList(s)
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// SubmissionHeader is the targetable read-only header block showing employer
+// info and action buttons. Carries its own id for HTMX swap.
+templ SubmissionHeader(s *domain.Submission) {
+	<div id="submission-header" class="mb-6">
+		<div class="flex justify-between items-start">
 			<div>
 				<h1 class="font-mono text-[1.4rem] font-semibold m-0">{ s.Employer.Name }</h1>
 				<div class="text-[0.85rem] text-muted mt-1">
 					EIN: <span class="font-mono">{ s.Employer.EIN }</span> · { itoa(int64(len(s.Employees))) } employee correction(s)
 				</div>
+				if s.Employer.AddressLine1 != "" {
+					<div class="text-[0.75rem] text-muted mt-1 font-mono">{ s.Employer.AddressLine1 }</div>
+				}
+				if s.Employer.City != "" || s.Employer.State != "" {
+					<div class="text-[0.75rem] text-muted font-mono">
+						{ s.Employer.City }
+						if s.Employer.City != "" && s.Employer.State != "" {
+							,
+						}
+						{ s.Employer.State }
+						if s.Employer.ZIP != "" {
+							 { s.Employer.ZIP }
+						}
+					</div>
+				}
+				if s.Notes != "" {
+					<div class="text-[0.75rem] text-muted mt-1 italic">{ s.Notes }</div>
+				}
 			</div>
-			<div class="flex gap-2.5">
+			<div class="flex gap-2.5 shrink-0 ml-4">
+				<button
+					class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-4 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-ink border-ink hover:bg-ink hover:text-white"
+					hx-get={ "/submissions/" + itoa(s.ID) + "/edit" }
+					hx-target="#submission-header"
+					hx-swap="outerHTML"
+				>
+					EDIT
+				</button>
 				<a href={ templ.SafeURL("/submissions/" + itoa(s.ID) + "/generate") }>
 					<button class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-5 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-accent2 text-white border-accent2 hover:brightness-110">
 						⬇ GENERATE EFW2C FILE
@@ -34,17 +79,5 @@ templ Detail(s *domain.Submission) {
 				</button>
 			</div>
 		</div>
-
-		<div class="grid grid-cols-[400px_1fr] gap-7 items-start">
-			@AddEmployeeForm(s.ID)
-			<div>
-				<div class="font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 mb-4">
-					Employee Corrections ({ itoa(int64(len(s.Employees))) })
-				</div>
-				<div id="employee-list">
-					@EmployeeList(s)
-				</div>
-			</div>
-		</div>
-	}
+	</div>
 }

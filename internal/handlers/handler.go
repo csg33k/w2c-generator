@@ -30,6 +30,9 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("POST /submissions", h.createSubmission)
 	mux.HandleFunc("GET /submissions/{id}", h.viewSubmission)
 	mux.HandleFunc("DELETE /submissions/{id}", h.deleteSubmission)
+	mux.HandleFunc("GET /submissions/{id}/edit", h.editSubmissionForm)
+	mux.HandleFunc("GET /submissions/{id}/header", h.getSubmissionHeader)
+	mux.HandleFunc("PUT /submissions/{id}", h.updateSubmission)
 	mux.HandleFunc("POST /submissions/{id}/employees", h.addEmployee)
 	mux.HandleFunc("GET /employees/{id}/edit", h.editEmployeeForm)
 	mux.HandleFunc("GET /employees/{id}/card", h.getEmployeeCard)
@@ -100,6 +103,79 @@ func (h *Handler) viewSubmission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render(w, r, templates.Detail(s))
+}
+
+// editSubmissionForm renders the inline edit form for the submission header.
+func (h *Handler) editSubmissionForm(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	s, err := h.repo.GetSubmission(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	render(w, r, templates.SubmissionEditForm(s))
+}
+
+// getSubmissionHeader renders the read-only submission header fragment (used by cancel).
+func (h *Handler) getSubmissionHeader(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	s, err := h.repo.GetSubmission(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	render(w, r, templates.SubmissionHeader(s))
+}
+
+// updateSubmission handles PUT /submissions/{id} and renders the updated header.
+func (h *Handler) updateSubmission(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	// Fetch first to preserve CreatedAt, SubmittedAt, Employees, etc.
+	s, err := h.repo.GetSubmission(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	s.Submitter.BSOUID = r.FormValue("bso_uid")
+	s.Submitter.ContactName = r.FormValue("contact_name")
+	s.Submitter.ContactPhone = stripNonDigits(r.FormValue("contact_phone"))
+	s.Submitter.ContactEmail = r.FormValue("contact_email")
+	s.Submitter.PreparerCode = r.FormValue("preparer_code")
+	s.Employer.EIN = stripDashes(r.FormValue("ein"))
+	s.Employer.Name = r.FormValue("employer_name")
+	s.Employer.AddressLine1 = r.FormValue("emp_addr1")
+	s.Employer.AddressLine2 = r.FormValue("emp_addr2")
+	s.Employer.City = r.FormValue("emp_city")
+	s.Employer.State = r.FormValue("emp_state")
+	s.Employer.ZIP = r.FormValue("emp_zip")
+	s.Employer.ZIPExtension = r.FormValue("emp_zip_ext")
+	s.Employer.EmploymentCode = r.FormValue("employment_code")
+	s.Employer.KindOfEmployer = r.FormValue("kind_of_employer")
+	s.Employer.ContactName = r.FormValue("employer_contact_name")
+	s.Employer.ContactPhone = stripNonDigits(r.FormValue("employer_contact_phone"))
+	s.Employer.ContactEmail = r.FormValue("employer_contact_email")
+	s.Notes = r.FormValue("notes")
+	if err := h.repo.UpdateSubmission(r.Context(), s); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	render(w, r, templates.SubmissionHeader(s))
 }
 
 func (h *Handler) deleteSubmission(w http.ResponseWriter, r *http.Request) {

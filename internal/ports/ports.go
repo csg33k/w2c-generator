@@ -12,6 +12,7 @@ type SubmissionRepository interface {
 	CreateSubmission(ctx context.Context, s *domain.Submission) error
 	GetSubmission(ctx context.Context, id int64) (*domain.Submission, error)
 	ListSubmissions(ctx context.Context) ([]domain.Submission, error)
+	UpdateSubmission(ctx context.Context, s *domain.Submission) error
 	DeleteSubmission(ctx context.Context, id int64) error
 
 	AddEmployee(ctx context.Context, submissionID int64, e *domain.EmployeeRecord) error
