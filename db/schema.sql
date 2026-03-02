@@ -45,9 +45,10 @@ CREATE TABLE employees (
                                          corr_med_tax   INTEGER NOT NULL DEFAULT 0,
                                          created_at     DATETIME NOT NULL,
                                          updated_at     DATETIME NOT NULL
-, orig_ss_tips INTEGER NOT NULL DEFAULT 0, corr_ss_tips INTEGER NOT NULL DEFAULT 0);
+, orig_ss_tips INTEGER NOT NULL DEFAULT 0, corr_ss_tips INTEGER NOT NULL DEFAULT 0, orig_state_code TEXT NOT NULL DEFAULT '', corr_state_code TEXT NOT NULL DEFAULT '', orig_state_id   TEXT NOT NULL DEFAULT '', corr_state_id   TEXT NOT NULL DEFAULT '', orig_state_wages INTEGER NOT NULL DEFAULT 0, corr_state_wages INTEGER NOT NULL DEFAULT 0, orig_state_tax INTEGER NOT NULL DEFAULT 0, corr_state_tax INTEGER NOT NULL DEFAULT 0, orig_local_wages INTEGER NOT NULL DEFAULT 0, corr_local_wages INTEGER NOT NULL DEFAULT 0, orig_local_tax INTEGER NOT NULL DEFAULT 0, corr_local_tax INTEGER NOT NULL DEFAULT 0, orig_locality_name TEXT NOT NULL DEFAULT '', corr_locality_name TEXT NOT NULL DEFAULT '');
 -- Dbmate schema migrations
 INSERT INTO "schema_migrations" (version) VALUES
   ('20260228000001'),
   ('20260228000002'),
-  ('20260301170046');
+  ('20260301170046'),
+  ('20260302000001');

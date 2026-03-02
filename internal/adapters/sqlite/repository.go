@@ -104,6 +104,13 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 		       orig_ss_tax, corr_ss_tax,
 		       orig_med_tax, corr_med_tax,
 		       orig_ss_tips, corr_ss_tips,
+		       orig_state_code, corr_state_code,
+		       orig_state_id, corr_state_id,
+		       orig_state_wages, corr_state_wages,
+		       orig_state_tax, corr_state_tax,
+		       orig_local_wages, corr_local_wages,
+		       orig_local_tax, corr_local_tax,
+		       orig_locality_name, corr_locality_name,
 		       created_at, updated_at
 		FROM employees WHERE submission_id=? ORDER BY id`, id)
 	if err != nil {
@@ -123,6 +130,13 @@ func (r *Repository) GetSubmission(ctx context.Context, id int64) (*domain.Submi
 			&e.Amounts.OriginalSocialSecurityTax, &e.Amounts.CorrectSocialSecurityTax,
 			&e.Amounts.OriginalMedicareTax, &e.Amounts.CorrectMedicareTax,
 			&e.Amounts.OriginalSocialSecurityTips, &e.Amounts.CorrectSocialSecurityTips,
+			&e.OriginalStateCode, &e.CorrectStateCode,
+			&e.OriginalStateIDNumber, &e.CorrectStateIDNumber,
+			&e.Amounts.OriginalStateWages, &e.Amounts.CorrectStateWages,
+			&e.Amounts.OriginalStateIncomeTax, &e.Amounts.CorrectStateIncomeTax,
+			&e.Amounts.OriginalLocalWages, &e.Amounts.CorrectLocalWages,
+			&e.Amounts.OriginalLocalIncomeTax, &e.Amounts.CorrectLocalIncomeTax,
+			&e.OriginalLocalityName, &e.CorrectLocalityName,
 			&e.CreatedAt, &e.UpdatedAt,
 		); err != nil {
 			return nil, err
@@ -200,8 +214,15 @@ func (r *Repository) AddEmployee(ctx context.Context, submissionID int64, e *dom
 			orig_ss_tax, corr_ss_tax,
 			orig_med_tax, corr_med_tax,
 			orig_ss_tips, corr_ss_tips,
+			orig_state_code, corr_state_code,
+			orig_state_id, corr_state_id,
+			orig_state_wages, corr_state_wages,
+			orig_state_tax, corr_state_tax,
+			orig_local_wages, corr_local_wages,
+			orig_local_tax, corr_local_tax,
+			orig_locality_name, corr_locality_name,
 			created_at, updated_at
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		submissionID, e.SSN, e.OriginalSSN,
 		e.FirstName, e.MiddleName, e.LastName, e.Suffix,
 		e.AddressLine1, e.AddressLine2, e.City, e.State, e.ZIP, e.ZIPExtension,
@@ -212,6 +233,13 @@ func (r *Repository) AddEmployee(ctx context.Context, submissionID int64, e *dom
 		e.Amounts.OriginalSocialSecurityTax, e.Amounts.CorrectSocialSecurityTax,
 		e.Amounts.OriginalMedicareTax, e.Amounts.CorrectMedicareTax,
 		e.Amounts.OriginalSocialSecurityTips, e.Amounts.CorrectSocialSecurityTips,
+		e.OriginalStateCode, e.CorrectStateCode,
+		e.OriginalStateIDNumber, e.CorrectStateIDNumber,
+		e.Amounts.OriginalStateWages, e.Amounts.CorrectStateWages,
+		e.Amounts.OriginalStateIncomeTax, e.Amounts.CorrectStateIncomeTax,
+		e.Amounts.OriginalLocalWages, e.Amounts.CorrectLocalWages,
+		e.Amounts.OriginalLocalIncomeTax, e.Amounts.CorrectLocalIncomeTax,
+		e.OriginalLocalityName, e.CorrectLocalityName,
 		now, now,
 	)
 	if err != nil {
@@ -238,6 +266,13 @@ func (r *Repository) GetEmployee(ctx context.Context, id int64) (*domain.Employe
 		       orig_ss_tax, corr_ss_tax,
 		       orig_med_tax, corr_med_tax,
 		       orig_ss_tips, corr_ss_tips,
+		       orig_state_code, corr_state_code,
+		       orig_state_id, corr_state_id,
+		       orig_state_wages, corr_state_wages,
+		       orig_state_tax, corr_state_tax,
+		       orig_local_wages, corr_local_wages,
+		       orig_local_tax, corr_local_tax,
+		       orig_locality_name, corr_locality_name,
 		       created_at, updated_at
 		FROM employees WHERE id=?`, id).Scan(
 		&e.ID, &e.SubmissionID, &e.SSN, &e.OriginalSSN,
@@ -250,6 +285,13 @@ func (r *Repository) GetEmployee(ctx context.Context, id int64) (*domain.Employe
 		&e.Amounts.OriginalSocialSecurityTax, &e.Amounts.CorrectSocialSecurityTax,
 		&e.Amounts.OriginalMedicareTax, &e.Amounts.CorrectMedicareTax,
 		&e.Amounts.OriginalSocialSecurityTips, &e.Amounts.CorrectSocialSecurityTips,
+		&e.OriginalStateCode, &e.CorrectStateCode,
+		&e.OriginalStateIDNumber, &e.CorrectStateIDNumber,
+		&e.Amounts.OriginalStateWages, &e.Amounts.CorrectStateWages,
+		&e.Amounts.OriginalStateIncomeTax, &e.Amounts.CorrectStateIncomeTax,
+		&e.Amounts.OriginalLocalWages, &e.Amounts.CorrectLocalWages,
+		&e.Amounts.OriginalLocalIncomeTax, &e.Amounts.CorrectLocalIncomeTax,
+		&e.OriginalLocalityName, &e.CorrectLocalityName,
 		&e.CreatedAt, &e.UpdatedAt,
 	)
 	if err != nil {
@@ -272,6 +314,13 @@ func (r *Repository) UpdateEmployee(ctx context.Context, e *domain.EmployeeRecor
 		    orig_ss_tax=?, corr_ss_tax=?,
 		    orig_med_tax=?, corr_med_tax=?,
 		    orig_ss_tips=?, corr_ss_tips=?,
+		    orig_state_code=?, corr_state_code=?,
+		    orig_state_id=?, corr_state_id=?,
+		    orig_state_wages=?, corr_state_wages=?,
+		    orig_state_tax=?, corr_state_tax=?,
+		    orig_local_wages=?, corr_local_wages=?,
+		    orig_local_tax=?, corr_local_tax=?,
+		    orig_locality_name=?, corr_locality_name=?,
 		    updated_at=?
 		WHERE id=?`,
 		e.SSN, e.OriginalSSN,
@@ -284,6 +333,13 @@ func (r *Repository) UpdateEmployee(ctx context.Context, e *domain.EmployeeRecor
 		e.Amounts.OriginalSocialSecurityTax, e.Amounts.CorrectSocialSecurityTax,
 		e.Amounts.OriginalMedicareTax, e.Amounts.CorrectMedicareTax,
 		e.Amounts.OriginalSocialSecurityTips, e.Amounts.CorrectSocialSecurityTips,
+		e.OriginalStateCode, e.CorrectStateCode,
+		e.OriginalStateIDNumber, e.CorrectStateIDNumber,
+		e.Amounts.OriginalStateWages, e.Amounts.CorrectStateWages,
+		e.Amounts.OriginalStateIncomeTax, e.Amounts.CorrectStateIncomeTax,
+		e.Amounts.OriginalLocalWages, e.Amounts.CorrectLocalWages,
+		e.Amounts.OriginalLocalIncomeTax, e.Amounts.CorrectLocalIncomeTax,
+		e.OriginalLocalityName, e.CorrectLocalityName,
 		e.UpdatedAt, e.ID,
 	)
 	return err

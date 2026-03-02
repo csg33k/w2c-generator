@@ -31,9 +31,9 @@ templ EmployeeCard(e domain.EmployeeRecord, subID int64) {
 					}
 				</div>
 				<div class="text-[0.75rem] text-muted mt-0.5">
-					SSN: <span class="font-mono">{ e.SSN }</span>
+					SSN: <span class="font-mono">{ formatSSN(e.SSN) }</span>
 					if e.OriginalSSN != "" {
-						· Orig SSN: <span class="font-mono">{ e.OriginalSSN }</span>
+						· Orig SSN: <span class="font-mono">{ formatSSN(e.OriginalSSN) }</span>
 					}
 				</div>
 				if e.AddressLine1 != "" {
@@ -83,7 +83,32 @@ templ EmployeeCard(e domain.EmployeeRecord, subID int64) {
 			@amountCell("BOX 5 — MED WAGES",  e.Amounts.OriginalMedicareWages,           e.Amounts.CorrectMedicareWages)
 			@amountCell("BOX 6 — MED TAX",    e.Amounts.OriginalMedicareTax,             e.Amounts.CorrectMedicareTax)
 			@amountCell("BOX 7 — SS TIPS",    e.Amounts.OriginalSocialSecurityTips,      e.Amounts.CorrectSocialSecurityTips)
+			if e.Amounts.OriginalStateWages != 0 || e.Amounts.CorrectStateWages != 0 {
+				@amountCell("BOX 16 — STATE WAGES", e.Amounts.OriginalStateWages, e.Amounts.CorrectStateWages)
+			}
+			if e.Amounts.OriginalStateIncomeTax != 0 || e.Amounts.CorrectStateIncomeTax != 0 {
+				@amountCell("BOX 17 — STATE TAX", e.Amounts.OriginalStateIncomeTax, e.Amounts.CorrectStateIncomeTax)
+			}
+			if e.Amounts.OriginalLocalWages != 0 || e.Amounts.CorrectLocalWages != 0 {
+				@amountCell("BOX 18 — LOCAL WAGES", e.Amounts.OriginalLocalWages, e.Amounts.CorrectLocalWages)
+			}
+			if e.Amounts.OriginalLocalIncomeTax != 0 || e.Amounts.CorrectLocalIncomeTax != 0 {
+				@amountCell("BOX 19 — LOCAL TAX", e.Amounts.OriginalLocalIncomeTax, e.Amounts.CorrectLocalIncomeTax)
+			}
 		</div>
+		if e.CorrectStateCode != "" || e.OriginalStateCode != "" || e.CorrectLocalityName != "" || e.OriginalLocalityName != "" {
+			<div class="mt-2 text-[0.7rem] text-muted font-mono">
+				if e.OriginalStateCode != "" || e.CorrectStateCode != "" {
+					State: { e.OriginalStateCode } → { e.CorrectStateCode }
+					if e.OriginalStateIDNumber != "" || e.CorrectStateIDNumber != "" {
+						· ID: { e.OriginalStateIDNumber } → { e.CorrectStateIDNumber }
+					}
+				}
+				if e.OriginalLocalityName != "" || e.CorrectLocalityName != "" {
+					· Locality: { e.OriginalLocalityName } → { e.CorrectLocalityName }
+				}
+			</div>
+		}
 	</div>
 }
 

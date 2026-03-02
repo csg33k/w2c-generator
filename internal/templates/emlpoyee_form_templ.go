@@ -67,7 +67,7 @@ func AddEmployeeForm(submissionID int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input type=\"text\" name=\"ssn\" placeholder=\"123-45-6789\" required maxlength=\"11\" class=\"font-mono\"></div><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input type=\"text\" name=\"ssn\" placeholder=\"123-45-6789\" required maxlength=\"11\" class=\"font-mono\" oninput=\"var v=this.value.replace(/\\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v\"></div><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -75,7 +75,7 @@ func AddEmployeeForm(submissionID int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<input type=\"text\" name=\"original_ssn\" placeholder=\"Leave blank if unchanged\" maxlength=\"11\" class=\"font-mono\"></div><div class=\"grid grid-cols-2 gap-2\"><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<input type=\"text\" name=\"original_ssn\" placeholder=\"Leave blank if unchanged\" maxlength=\"11\" class=\"font-mono\" oninput=\"var v=this.value.replace(/\\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v\"></div><div class=\"grid grid-cols-2 gap-2\"><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -207,7 +207,95 @@ func AddEmployeeForm(submissionID int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div><div class=\"mt-4 flex justify-end\"><button type=\"submit\" class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent\">ADD EMPLOYEE +</button></div></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div><hr class=\"border-0 border-t-2 border-ink my-5\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = SectionHeader("State Correction", "Boxes 15–17").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"grid gap-2\"><div class=\"grid grid-cols-2 gap-2\"><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">BOX 15 ORIG</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = FieldLabel("State (orig)", "").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<input type=\"text\" name=\"orig_state_code\" placeholder=\"IL\" maxlength=\"2\" class=\"font-mono\"></div><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">BOX 15 CORR</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = FieldLabel("State (corr)", "").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<input type=\"text\" name=\"corr_state_code\" placeholder=\"IL\" maxlength=\"2\" class=\"font-mono\"></div></div><div class=\"grid grid-cols-2 gap-2\"><div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = FieldLabel("Employer State ID (orig)", "").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<input type=\"text\" name=\"orig_state_id\" placeholder=\"State ID number\" maxlength=\"20\" class=\"font-mono\"></div><div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = FieldLabel("Employer State ID (corr)", "").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<input type=\"text\" name=\"corr_state_id\" placeholder=\"State ID number\" maxlength=\"20\" class=\"font-mono\"></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = amountRow("BOX 16 ORIG", "State Wages (orig)", "orig_state_wages", "BOX 16 CORR", "State Wages (corr)", "corr_state_wages").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = amountRow("BOX 17 ORIG", "State Income Tax (orig)", "orig_state_tax", "BOX 17 CORR", "State Income Tax (corr)", "corr_state_tax").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div><hr class=\"border-0 border-t-2 border-ink my-5\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = SectionHeader("Locality Correction", "Boxes 18–20").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"grid gap-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = amountRow("BOX 18 ORIG", "Local Wages (orig)", "orig_local_wages", "BOX 18 CORR", "Local Wages (corr)", "corr_local_wages").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = amountRow("BOX 19 ORIG", "Local Income Tax (orig)", "orig_local_tax", "BOX 19 CORR", "Local Income Tax (corr)", "corr_local_tax").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"grid grid-cols-2 gap-2\"><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">BOX 20 ORIG</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = FieldLabel("Locality Name (orig)", "").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<input type=\"text\" name=\"orig_locality_name\" placeholder=\"e.g. CHICAGO\" maxlength=\"30\" class=\"font-mono\"></div><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">BOX 20 CORR</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = FieldLabel("Locality Name (corr)", "").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<input type=\"text\" name=\"corr_locality_name\" placeholder=\"e.g. CHICAGO\" maxlength=\"30\" class=\"font-mono\"></div></div></div><div class=\"mt-4 flex justify-end\"><button type=\"submit\" class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent\">ADD EMPLOYEE +</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -237,20 +325,20 @@ func amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName string
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"grid grid-cols-2 gap-2\"><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"grid grid-cols-2 gap-2\"><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(origBox)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 105, Col: 116}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 157, Col: 116}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -258,33 +346,33 @@ func amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName string
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<input type=\"number\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<input type=\"number\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(origName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 107, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 159, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" step=\"0.01\" min=\"0\" placeholder=\"0.00\" class=\"font-mono\"></div><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" step=\"0.01\" min=\"0\" placeholder=\"0.00\" class=\"font-mono\"></div><div><div class=\"font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(corrBox)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 110, Col: 116}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 162, Col: 116}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -292,20 +380,20 @@ func amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName string
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<input type=\"number\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<input type=\"number\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(corrName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 112, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/emlpoyee_form.templ`, Line: 164, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" step=\"0.01\" min=\"0\" placeholder=\"0.00\" class=\"font-mono\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" step=\"0.01\" min=\"0\" placeholder=\"0.00\" class=\"font-mono\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

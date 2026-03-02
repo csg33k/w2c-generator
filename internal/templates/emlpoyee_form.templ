@@ -14,11 +14,13 @@ templ AddEmployeeForm(submissionID int64) {
 			<div class="grid gap-2.5">
 				<div>
 					@FieldLabel("Correct SSN *", "")
-					<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="font-mono"/>
+					<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="font-mono"
+						oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
 				</div>
 				<div>
 					@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
-					<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="font-mono"/>
+					<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="font-mono"
+						oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
 				</div>
 				<div class="grid grid-cols-2 gap-2">
 					<div>
@@ -87,6 +89,56 @@ templ AddEmployeeForm(submissionID int64) {
 				@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
 				@amountRow("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", "BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax")
 				@amountRow("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", "BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax")
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("State Correction", "Boxes 15–17")
+			<div class="grid gap-2">
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 ORIG</div>
+						@FieldLabel("State (orig)", "")
+						<input type="text" name="orig_state_code" placeholder="IL" maxlength="2" class="font-mono"/>
+					</div>
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 CORR</div>
+						@FieldLabel("State (corr)", "")
+						<input type="text" name="corr_state_code" placeholder="IL" maxlength="2" class="font-mono"/>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("Employer State ID (orig)", "")
+						<input type="text" name="orig_state_id" placeholder="State ID number" maxlength="20" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("Employer State ID (corr)", "")
+						<input type="text" name="corr_state_id" placeholder="State ID number" maxlength="20" class="font-mono"/>
+					</div>
+				</div>
+				@amountRow("BOX 16 ORIG", "State Wages (orig)", "orig_state_wages", "BOX 16 CORR", "State Wages (corr)", "corr_state_wages")
+				@amountRow("BOX 17 ORIG", "State Income Tax (orig)", "orig_state_tax", "BOX 17 CORR", "State Income Tax (corr)", "corr_state_tax")
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Locality Correction", "Boxes 18–20")
+			<div class="grid gap-2">
+				@amountRow("BOX 18 ORIG", "Local Wages (orig)", "orig_local_wages", "BOX 18 CORR", "Local Wages (corr)", "corr_local_wages")
+				@amountRow("BOX 19 ORIG", "Local Income Tax (orig)", "orig_local_tax", "BOX 19 CORR", "Local Income Tax (corr)", "corr_local_tax")
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 ORIG</div>
+						@FieldLabel("Locality Name (orig)", "")
+						<input type="text" name="orig_locality_name" placeholder="e.g. CHICAGO" maxlength="30" class="font-mono"/>
+					</div>
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 CORR</div>
+						@FieldLabel("Locality Name (corr)", "")
+						<input type="text" name="corr_locality_name" placeholder="e.g. CHICAGO" maxlength="30" class="font-mono"/>
+					</div>
+				</div>
 			</div>
 
 			<div class="mt-4 flex justify-end">

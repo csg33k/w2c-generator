@@ -17,11 +17,13 @@ templ EmployeeEditForm(e *domain.EmployeeRecord) {
 			<div class="grid gap-2.5">
 				<div>
 					@FieldLabel("Correct SSN *", "")
-					<input type="text" name="ssn" value={ e.SSN } required maxlength="11" class="font-mono"/>
+					<input type="text" name="ssn" value={ formatSSN(e.SSN) } required maxlength="11" class="font-mono"
+						oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
 				</div>
 				<div>
 					@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
-					<input type="text" name="original_ssn" value={ e.OriginalSSN } maxlength="11" class="font-mono"/>
+					<input type="text" name="original_ssn" value={ formatSSN(e.OriginalSSN) } maxlength="11" class="font-mono"
+						oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
 				</div>
 				<div class="grid grid-cols-2 gap-2">
 					<div>
@@ -97,6 +99,60 @@ templ EmployeeEditForm(e *domain.EmployeeRecord) {
 					"BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax", e.Amounts.CorrectSocialSecurityTax)
 				@amountRowPrefilled("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", e.Amounts.OriginalMedicareTax,
 					"BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax", e.Amounts.CorrectMedicareTax)
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("State Correction", "Boxes 15–17")
+			<div class="grid gap-2">
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 ORIG</div>
+						@FieldLabel("State (orig)", "")
+						<input type="text" name="orig_state_code" value={ e.OriginalStateCode } maxlength="2" class="font-mono"/>
+					</div>
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 CORR</div>
+						@FieldLabel("State (corr)", "")
+						<input type="text" name="corr_state_code" value={ e.CorrectStateCode } maxlength="2" class="font-mono"/>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						@FieldLabel("Employer State ID (orig)", "")
+						<input type="text" name="orig_state_id" value={ e.OriginalStateIDNumber } maxlength="20" class="font-mono"/>
+					</div>
+					<div>
+						@FieldLabel("Employer State ID (corr)", "")
+						<input type="text" name="corr_state_id" value={ e.CorrectStateIDNumber } maxlength="20" class="font-mono"/>
+					</div>
+				</div>
+				@amountRowPrefilled("BOX 16 ORIG", "State Wages (orig)", "orig_state_wages", e.Amounts.OriginalStateWages,
+					"BOX 16 CORR", "State Wages (corr)", "corr_state_wages", e.Amounts.CorrectStateWages)
+				@amountRowPrefilled("BOX 17 ORIG", "State Income Tax (orig)", "orig_state_tax", e.Amounts.OriginalStateIncomeTax,
+					"BOX 17 CORR", "State Income Tax (corr)", "corr_state_tax", e.Amounts.CorrectStateIncomeTax)
+			</div>
+
+			<hr class="border-0 border-t-2 border-ink my-5"/>
+
+			@SectionHeader("Locality Correction", "Boxes 18–20")
+			<div class="grid gap-2">
+				@amountRowPrefilled("BOX 18 ORIG", "Local Wages (orig)", "orig_local_wages", e.Amounts.OriginalLocalWages,
+					"BOX 18 CORR", "Local Wages (corr)", "corr_local_wages", e.Amounts.CorrectLocalWages)
+				@amountRowPrefilled("BOX 19 ORIG", "Local Income Tax (orig)", "orig_local_tax", e.Amounts.OriginalLocalIncomeTax,
+					"BOX 19 CORR", "Local Income Tax (corr)", "corr_local_tax", e.Amounts.CorrectLocalIncomeTax)
+				<div class="grid grid-cols-2 gap-2">
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 ORIG</div>
+						@FieldLabel("Locality Name (orig)", "")
+						<input type="text" name="orig_locality_name" value={ e.OriginalLocalityName } maxlength="30" class="font-mono"/>
+					</div>
+					<div>
+						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 CORR</div>
+						@FieldLabel("Locality Name (corr)", "")
+						<input type="text" name="corr_locality_name" value={ e.CorrectLocalityName } maxlength="30" class="font-mono"/>
+					</div>
+				</div>
 			</div>
 
 			<div class="mt-4 flex justify-end gap-2">

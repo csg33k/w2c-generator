@@ -73,6 +73,18 @@ type MonetaryAmounts struct {
 	CorrectMedicareTax          int64
 	OriginalSocialSecurityTips  int64
 	CorrectSocialSecurityTips   int64
+	// Box 16 — State wages, tips, etc.
+	OriginalStateWages int64
+	CorrectStateWages  int64
+	// Box 17 — State income tax
+	OriginalStateIncomeTax int64
+	CorrectStateIncomeTax  int64
+	// Box 18 — Local wages, tips, etc.
+	OriginalLocalWages int64
+	CorrectLocalWages  int64
+	// Box 19 — Local income tax
+	OriginalLocalIncomeTax int64
+	CorrectLocalIncomeTax  int64
 }
 
 type EmployeeRecord struct {
@@ -91,8 +103,16 @@ type EmployeeRecord struct {
 	ZIP          string
 	ZIPExtension string
 	Amounts      MonetaryAmounts
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	// Box 15 — State / Employer's state ID number
+	OriginalStateCode     string
+	CorrectStateCode      string
+	OriginalStateIDNumber string
+	CorrectStateIDNumber  string
+	// Box 20 — Locality name
+	OriginalLocalityName string
+	CorrectLocalityName  string
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type Submission struct {

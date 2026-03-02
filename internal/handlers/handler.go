@@ -213,18 +213,24 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	e := &domain.EmployeeRecord{
-		SSN:          stripDashes(r.FormValue("ssn")),
-		OriginalSSN:  stripDashes(r.FormValue("original_ssn")),
-		FirstName:    r.FormValue("first_name"),
-		MiddleName:   r.FormValue("middle_name"),
-		LastName:     r.FormValue("last_name"),
-		Suffix:       r.FormValue("suffix"),
-		AddressLine1: r.FormValue("emp_addr1"),
-		AddressLine2: r.FormValue("emp_addr2"),
-		City:         r.FormValue("emp_city"),
-		State:        r.FormValue("emp_state"),
-		ZIP:          r.FormValue("emp_zip"),
-		ZIPExtension: r.FormValue("emp_zip_ext"),
+		SSN:                   stripDashes(r.FormValue("ssn")),
+		OriginalSSN:           stripDashes(r.FormValue("original_ssn")),
+		FirstName:             r.FormValue("first_name"),
+		MiddleName:            r.FormValue("middle_name"),
+		LastName:              r.FormValue("last_name"),
+		Suffix:                r.FormValue("suffix"),
+		AddressLine1:          r.FormValue("emp_addr1"),
+		AddressLine2:          r.FormValue("emp_addr2"),
+		City:                  r.FormValue("emp_city"),
+		State:                 r.FormValue("emp_state"),
+		ZIP:                   r.FormValue("emp_zip"),
+		ZIPExtension:          r.FormValue("emp_zip_ext"),
+		OriginalStateCode:     strings.ToUpper(strings.TrimSpace(r.FormValue("orig_state_code"))),
+		CorrectStateCode:      strings.ToUpper(strings.TrimSpace(r.FormValue("corr_state_code"))),
+		OriginalStateIDNumber: r.FormValue("orig_state_id"),
+		CorrectStateIDNumber:  r.FormValue("corr_state_id"),
+		OriginalLocalityName:  r.FormValue("orig_locality_name"),
+		CorrectLocalityName:   r.FormValue("corr_locality_name"),
 		Amounts: domain.MonetaryAmounts{
 			OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
 			CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
@@ -240,6 +246,14 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 			CorrectSocialSecurityTax:    parseCents(r.FormValue("corr_ss_tax")),
 			OriginalMedicareTax:         parseCents(r.FormValue("orig_med_tax")),
 			CorrectMedicareTax:          parseCents(r.FormValue("corr_med_tax")),
+			OriginalStateWages:          parseCents(r.FormValue("orig_state_wages")),
+			CorrectStateWages:           parseCents(r.FormValue("corr_state_wages")),
+			OriginalStateIncomeTax:      parseCents(r.FormValue("orig_state_tax")),
+			CorrectStateIncomeTax:       parseCents(r.FormValue("corr_state_tax")),
+			OriginalLocalWages:          parseCents(r.FormValue("orig_local_wages")),
+			CorrectLocalWages:           parseCents(r.FormValue("corr_local_wages")),
+			OriginalLocalIncomeTax:      parseCents(r.FormValue("orig_local_tax")),
+			CorrectLocalIncomeTax:       parseCents(r.FormValue("corr_local_tax")),
 		},
 	}
 	if err := h.repo.AddEmployee(r.Context(), subID, e); err != nil {
@@ -313,6 +327,12 @@ func (h *Handler) updateEmployee(w http.ResponseWriter, r *http.Request) {
 	e.State = r.FormValue("emp_state")
 	e.ZIP = r.FormValue("emp_zip")
 	e.ZIPExtension = r.FormValue("emp_zip_ext")
+	e.OriginalStateCode = strings.ToUpper(strings.TrimSpace(r.FormValue("orig_state_code")))
+	e.CorrectStateCode = strings.ToUpper(strings.TrimSpace(r.FormValue("corr_state_code")))
+	e.OriginalStateIDNumber = r.FormValue("orig_state_id")
+	e.CorrectStateIDNumber = r.FormValue("corr_state_id")
+	e.OriginalLocalityName = r.FormValue("orig_locality_name")
+	e.CorrectLocalityName = r.FormValue("corr_locality_name")
 	e.Amounts = domain.MonetaryAmounts{
 		OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
 		CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
@@ -328,6 +348,14 @@ func (h *Handler) updateEmployee(w http.ResponseWriter, r *http.Request) {
 		CorrectMedicareTax:          parseCents(r.FormValue("corr_med_tax")),
 		OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
 		CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
+		OriginalStateWages:          parseCents(r.FormValue("orig_state_wages")),
+		CorrectStateWages:           parseCents(r.FormValue("corr_state_wages")),
+		OriginalStateIncomeTax:      parseCents(r.FormValue("orig_state_tax")),
+		CorrectStateIncomeTax:       parseCents(r.FormValue("corr_state_tax")),
+		OriginalLocalWages:          parseCents(r.FormValue("orig_local_wages")),
+		CorrectLocalWages:           parseCents(r.FormValue("corr_local_wages")),
+		OriginalLocalIncomeTax:      parseCents(r.FormValue("orig_local_tax")),
+		CorrectLocalIncomeTax:       parseCents(r.FormValue("corr_local_tax")),
 	}
 	if err := h.repo.UpdateEmployee(r.Context(), e); err != nil {
 		http.Error(w, err.Error(), 500)
