@@ -326,20 +326,33 @@ func SubmissionHeader(s *domain.Submission) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"><button class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-5 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-accent2 text-white border-accent2 hover:brightness-110\">⬇ GENERATE EFW2C FILE</button></a> <button class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-4 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-accent border-accent hover:bg-accent hover:text-white\" hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"><button class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-5 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-accent2 text-white border-accent2 hover:brightness-110\">⬇ GENERATE EFW2C FILE</button></a> <a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("/submissions/" + itoa(s.ID))
+		var templ_7745c5c3_Var18 templ.SafeURL
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/submissions/" + itoa(s.ID) + "/pdf"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/details.templ`, Line: 84, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/details.templ`, Line: 82, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" hx-confirm=\"Delete this entire submission and all employees?\">DELETE</button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"><button class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-5 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:brightness-75\">⬇ PDF REPORT</button></a> <button class=\"font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-4 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-accent border-accent hover:bg-accent hover:text-white\" hx-delete=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("/submissions/" + itoa(s.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/details.templ`, Line: 89, Col: 45}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" hx-confirm=\"Delete this entire submission and all employees?\">DELETE</button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

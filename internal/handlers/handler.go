@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/csg33k/w2c-generator/internal/adapters/pdf"
 	"github.com/csg33k/w2c-generator/internal/domain"
 	"github.com/csg33k/w2c-generator/internal/ports"
 	"github.com/csg33k/w2c-generator/internal/templates"
@@ -39,6 +40,7 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("PUT /employees/{id}", h.updateEmployee)
 	mux.HandleFunc("DELETE /employees/{id}", h.deleteEmployee)
 	mux.HandleFunc("GET /submissions/{id}/generate", h.generateFile)
+	mux.HandleFunc("GET /submissions/{id}/pdf", h.generatePDF)
 	return mux
 }
 
@@ -411,6 +413,32 @@ func (h *Handler) generateFile(w http.ResponseWriter, r *http.Request) {
 	}
 	filename := fmt.Sprintf("W2C_%s_%s.txt", s.Employer.EIN, time.Now().Format("20060102"))
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	w.Write(buf.Bytes())
+}
+
+func (h *Handler) generatePDF(w http.ResponseWriter, r *http.Request) {
+	id, err := pathID(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", 400)
+		return
+	}
+	s, err := h.repo.GetSubmission(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if len(s.Employees) == 0 {
+		http.Error(w, "no employees in submission", 400)
+		return
+	}
+	var buf bytes.Buffer
+	if err := pdf.GeneratePDF(s, &buf); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	filename := fmt.Sprintf("W2C_%s_%s_report.pdf", s.Employer.EIN, time.Now().Format("20060102"))
+	w.Header().Set("Content-Type", "application/pdf")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	w.Write(buf.Bytes())
 }

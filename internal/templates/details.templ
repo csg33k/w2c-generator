@@ -79,6 +79,11 @@ templ SubmissionHeader(s *domain.Submission) {
 						⬇ GENERATE EFW2C FILE
 					</button>
 				</a>
+				<a href={ templ.SafeURL("/submissions/" + itoa(s.ID) + "/pdf") }>
+					<button class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-5 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:brightness-75">
+						⬇ PDF REPORT
+					</button>
+				</a>
 				<button
 					class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-4 py-2.5 border-2 cursor-pointer transition-all duration-150 uppercase bg-white text-accent border-accent hover:bg-accent hover:text-white"
 					hx-delete={ "/submissions/" + itoa(s.ID) }
