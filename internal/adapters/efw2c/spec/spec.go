@@ -158,7 +158,7 @@ func baseSpec(year int) *YearSpec {
 			{Name: "AgentIndicatorCode", Start: 36, End: 36, Type: Alpha, Required: false, Description: "0=none 1=2678Agent 2=CommonPaymaster 3=3504Agent"},
 			{Name: "TerminatingBusiness", Start: 37, End: 37, Type: Alpha, Required: false, Description: "1=employer terminating business"},
 			{Name: "EmploymentCode", Start: 38, End: 38, Type: Alpha, Required: true, Description: "A=Agri H=Household M=Military Q=MQGE R=Regular X=Railroad"},
-			{Name: "TaxJurisdictionCode", Start: 39, End: 39, Type: Alpha, Required: false, Description: "blank=US P=PR G=Guam V=USVI A=AmSamoa N=CNMI"},
+			{Name: "KindOfEmployer", Start: 39, End: 39, Type: Alpha, Required: false, Description: "F=Federal Gov S=State/Local(non-tax-exempt) T=Tax-Exempt Y=State/Local(tax-exempt) N=None Apply"},
 			{Name: "ThirdPartySickPayReap", Start: 40, End: 40, Type: Alpha, Required: false, Description: "1=third-party sick pay recap"},
 			{Name: "EmployerName", Start: 41, End: 75, Type: Alpha, Required: true, Description: "Employer name"},
 			{Name: "LocationAddress", Start: 76, End: 115, Type: Alpha, Required: true, Description: "Employer street address"},
