@@ -36,8 +36,8 @@ templ Index(submissions []domain.Submission, taxYears []domain.TaxYearInfo) {
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								@FieldLabel("Contact Phone *", "(digits only)")
-								<input type="tel" name="contact_phone" placeholder="8005551234" required maxlength="15" class="font-mono"/>
+								@FieldLabel("Contact Phone *", "(800) 555-1234")
+								<input type="tel" name="contact_phone" placeholder="(800) 555-1234" required maxlength="16" class="font-mono"/>
 							</div>
 							<div>
 								@FieldLabel("Contact Email *", "")
@@ -131,8 +131,8 @@ templ Index(submissions []domain.Submission, taxYears []domain.TaxYearInfo) {
 						</div>
 						<div class="grid grid-cols-2 gap-2">
 							<div>
-								@FieldLabel("Employer Contact Phone *", "(digits only)")
-								<input type="tel" name="employer_contact_phone" placeholder="8005551234" required maxlength="15" class="font-mono"/>
+								@FieldLabel("Employer Contact Phone *", "(800) 555-1234")
+								<input type="tel" name="employer_contact_phone" placeholder="(800) 555-1234" required maxlength="16" class="font-mono"/>
 							</div>
 							<div>
 								@FieldLabel("Employer Contact Email *", "")
@@ -179,7 +179,7 @@ templ SubmissionList(submissions []domain.Submission) {
 			>
 				<div class="font-mono font-semibold">{ s.Employer.Name }</div>
 				<div class="text-[0.75rem] text-muted mt-1">
-					EIN: <span class="font-mono">{ s.Employer.EIN }</span>
+					EIN: <span class="font-mono">{ formatEIN(s.Employer.EIN) }</span>
 					&#183; TY <span class="font-mono">{ s.Employer.TaxYear }</span>
 					&#183; { s.CreatedAt.Format("2006-01-02") }
 				</div>

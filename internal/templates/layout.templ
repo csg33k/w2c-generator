@@ -69,7 +69,32 @@ templ Base(title string) {
 			}
 			input:focus, select:focus, textarea:focus { border-bottom-color: #c0392b; }
 			input:disabled, select:disabled { background: #e8e0cc; cursor: not-allowed; }
+			/* ── Fullscreen form overlay ─────────────────────────────── */
+			.w2c-fullscreen {
+				position: fixed !important;
+				inset: 0 !important;
+				z-index: 999 !important;
+				overflow-y: auto !important;
+				padding: 32px !important;
+				background: #f5f0e8 !important;
+				border-left-width: 6px !important;
+				max-width: none !important;
+				margin: 0 !important;
+			}
+			.w2c-fullscreen .w2c-fs-inner {
+				max-width: 960px;
+				margin: 0 auto;
+			}
 		</style>
+		<script>
+			function w2cToggleFullscreen(id) {
+				const el = document.getElementById(id);
+				const isFs = el.classList.toggle('w2c-fullscreen');
+				const btn = el.querySelector('.w2c-fs-btn');
+				if (btn) btn.textContent = isFs ? '✕ COLLAPSE' : '⛶ EXPAND';
+				document.body.style.overflow = isFs ? 'hidden' : '';
+			}
+		</script>
 	</head>
 	<body>
 		<div style="max-width:1100px;margin:0 auto;padding:32px 24px;">

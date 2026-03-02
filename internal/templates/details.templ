@@ -34,7 +34,7 @@ templ SubmissionHeader(s *domain.Submission) {
 			<div>
 				<h1 class="font-mono text-[1.4rem] font-semibold m-0">{ s.Employer.Name }</h1>
 				<div class="text-[0.85rem] text-muted mt-1">
-					EIN: <span class="font-mono">{ s.Employer.EIN }</span>
+					EIN: <span class="font-mono">{ formatEIN(s.Employer.EIN) }</span>
 					· TY <span class="font-mono">{ s.Employer.TaxYear }</span>
 					· { itoa(int64(len(s.Employees))) } employee correction(s)
 					if taxYearPubURL(s.Employer.TaxYear) != "" {

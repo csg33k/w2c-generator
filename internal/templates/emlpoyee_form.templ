@@ -2,151 +2,233 @@ package templates
 
 // AddEmployeeForm is the sidebar form for adding a new employee correction.
 templ AddEmployeeForm(submissionID int64) {
-	<div class="bg-white/70 border border-ledger border-l-4 border-l-ink p-[22px]">
-		@SectionHeader("Add Employee Correction", "")
-		<form
-			hx-post={ "/submissions/" + itoa(submissionID) + "/employees" }
-			hx-target="#employee-list"
-			hx-swap="innerHTML"
-			hx-on:htmx:after-request="this.reset()"
-		>
-			@SectionHeader("Identity", "")
-			<div class="grid gap-2.5">
-				<div>
-					@FieldLabel("Correct SSN *", "")
-					<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="font-mono"
-						oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
+	<div id="add-emp-form" class="bg-white/70 border border-ledger border-l-4 border-l-ink p-[22px]">
+		<div class="w2c-fs-inner">
+			<div class="flex justify-between items-center mb-4">
+				<div class="font-mono text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-muted border-b border-rule pb-1 flex-1">
+					Add Employee Correction
 				</div>
-				<div>
-					@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
-					<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="font-mono"
-						oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
-				</div>
-				<div class="grid grid-cols-2 gap-2">
-					<div>
-						@FieldLabel("First Name *", "")
-						<input type="text" name="first_name" required maxlength="12"/>
-					</div>
-					<div>
-						@FieldLabel("Last Name *", "")
-						<input type="text" name="last_name" required maxlength="15"/>
-					</div>
-				</div>
-				<div class="grid grid-cols-[2fr_1fr] gap-2">
-					<div>
-						@FieldLabel("Middle Name", "")
-						<input type="text" name="middle_name" maxlength="15"/>
-					</div>
-					<div>
-						@FieldLabel("Suffix", "")
-						<input type="text" name="suffix" placeholder="JR" maxlength="4"/>
-					</div>
-				</div>
+				<button
+					type="button"
+					class="w2c-fs-btn font-mono text-[0.65rem] font-semibold tracking-[0.1em] px-2 py-1 border border-rule text-muted hover:text-ink hover:border-ink transition-colors ml-3 shrink-0 cursor-pointer bg-transparent"
+					onclick="w2cToggleFullscreen('add-emp-form')"
+				>⛶ EXPAND</button>
 			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			@SectionHeader("Employee Address", "")
-			<div class="grid gap-2">
-				<div>
-					@FieldLabel("Address Line 1", "")
-					<input type="text" name="emp_addr1" placeholder="123 MAIN ST" maxlength="40"/>
-				</div>
-				<div>
-					@FieldLabel("Address Line 2", "")
-					<input type="text" name="emp_addr2" placeholder="APT 4B" maxlength="40"/>
-				</div>
-				<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
+			<form
+				hx-post={ "/submissions/" + itoa(submissionID) + "/employees" }
+				hx-target="#employee-list"
+				hx-swap="innerHTML"
+				hx-on:htmx:after-request="this.reset()"
+			>
+				@SectionHeader("Identity", "")
+				<div class="grid gap-2.5">
 					<div>
-						@FieldLabel("City", "")
-						<input type="text" name="emp_city" placeholder="SPRINGFIELD" maxlength="39"/>
+						@FieldLabel("Correct SSN *", "")
+						<input type="text" name="ssn" placeholder="123-45-6789" required maxlength="11" class="font-mono"
+							oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
 					</div>
 					<div>
-						@FieldLabel("State", "")
-						<input type="text" name="emp_state" placeholder="IL" maxlength="2" class="font-mono"/>
+						@FieldLabel("Originally Reported SSN", "(if correcting SSN)")
+						<input type="text" name="original_ssn" placeholder="Leave blank if unchanged" maxlength="11" class="font-mono"
+							oninput="var v=this.value.replace(/\D/g,'').substring(0,9);this.value=v.length>5?v.substring(0,3)+'-'+v.substring(3,5)+'-'+v.substring(5):v.length>3?v.substring(0,3)+'-'+v.substring(3):v"/>
 					</div>
-					<div>
-						@FieldLabel("ZIP", "")
-						<input type="text" name="emp_zip" placeholder="62701" maxlength="5" class="font-mono"/>
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							@FieldLabel("First Name *", "")
+							<input type="text" name="first_name" required maxlength="15"/>
+						</div>
+						<div>
+							@FieldLabel("Last Name *", "")
+							<input type="text" name="last_name" required maxlength="20"/>
+						</div>
 					</div>
-				</div>
-			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			@SectionHeader("Wages & Social Security", "")
-			<div class="grid gap-2">
-				@amountRow("BOX 1 ORIG", "Wages/Tips/Other (orig)", "orig_wages", "BOX 1 CORR", "Wages/Tips/Other (corr)", "corr_wages")
-				@amountRow("BOX 3 ORIG", "SS Wages (orig)", "orig_ss_wages", "BOX 3 CORR", "SS Wages (corr)", "corr_ss_wages")
-				@amountRow("BOX 5 ORIG", "Medicare Wages (orig)", "orig_med_wages", "BOX 5 CORR", "Medicare Wages (corr)", "corr_med_wages")
-				@amountRow("BOX 7 ORIG", "SS Tips (orig)", "orig_ss_tips", "BOX 7 CORR", "SS Tips (corr)", "corr_ss_tips")
-			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			@SectionHeader("Tax Withholdings", "")
-			<div class="grid gap-2">
-				@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
-				@amountRow("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", "BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax")
-				@amountRow("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", "BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax")
-			</div>
-
-			<hr class="border-0 border-t-2 border-ink my-5"/>
-
-			@SectionHeader("State Correction", "Boxes 15–17")
-			<div class="grid gap-2">
-				<div class="grid grid-cols-2 gap-2">
-					<div>
-						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 ORIG</div>
-						@FieldLabel("State (orig)", "")
-						<input type="text" name="orig_state_code" placeholder="IL" maxlength="2" class="font-mono"/>
-					</div>
-					<div>
-						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 CORR</div>
-						@FieldLabel("State (corr)", "")
-						<input type="text" name="corr_state_code" placeholder="IL" maxlength="2" class="font-mono"/>
+					<div class="grid grid-cols-[2fr_1fr] gap-2">
+						<div>
+							@FieldLabel("Middle Name", "")
+							<input type="text" name="middle_name" maxlength="15"/>
+						</div>
+						<div>
+							@FieldLabel("Suffix", "")
+							<input type="text" name="suffix" placeholder="JR" maxlength="4"/>
+						</div>
 					</div>
 				</div>
-				<div class="grid grid-cols-2 gap-2">
-					<div>
-						@FieldLabel("Employer State ID (orig)", "")
-						<input type="text" name="orig_state_id" placeholder="State ID number" maxlength="20" class="font-mono"/>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Name Correction", "only if correcting a previously reported wrong name")
+				<div class="grid gap-2.5">
+					<p class="font-mono text-[0.65rem] text-muted m-0">Fill in the fields below only if you are correcting a name that was previously reported incorrectly. Leave blank otherwise.</p>
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							@FieldLabel("Orig First Name", "")
+							<input type="text" name="orig_first_name" placeholder="As previously filed" maxlength="15"/>
+						</div>
+						<div>
+							@FieldLabel("Orig Last Name", "")
+							<input type="text" name="orig_last_name" placeholder="As previously filed" maxlength="20"/>
+						</div>
 					</div>
-					<div>
-						@FieldLabel("Employer State ID (corr)", "")
-						<input type="text" name="corr_state_id" placeholder="State ID number" maxlength="20" class="font-mono"/>
+					<div class="grid grid-cols-[2fr_1fr] gap-2">
+						<div>
+							@FieldLabel("Orig Middle Name", "")
+							<input type="text" name="orig_middle_name" maxlength="15"/>
+						</div>
+						<div>
+							@FieldLabel("Orig Suffix", "")
+							<input type="text" name="orig_suffix" maxlength="4"/>
+						</div>
 					</div>
 				</div>
-				@amountRow("BOX 16 ORIG", "State Wages (orig)", "orig_state_wages", "BOX 16 CORR", "State Wages (corr)", "corr_state_wages")
-				@amountRow("BOX 17 ORIG", "State Income Tax (orig)", "orig_state_tax", "BOX 17 CORR", "State Income Tax (corr)", "corr_state_tax")
-			</div>
 
-			<hr class="border-0 border-t-2 border-ink my-5"/>
+				<hr class="border-0 border-t-2 border-ink my-5"/>
 
-			@SectionHeader("Locality Correction", "Boxes 18–20")
-			<div class="grid gap-2">
-				@amountRow("BOX 18 ORIG", "Local Wages (orig)", "orig_local_wages", "BOX 18 CORR", "Local Wages (corr)", "corr_local_wages")
-				@amountRow("BOX 19 ORIG", "Local Income Tax (orig)", "orig_local_tax", "BOX 19 CORR", "Local Income Tax (corr)", "corr_local_tax")
-				<div class="grid grid-cols-2 gap-2">
+				@SectionHeader("Employee Address", "")
+				<div class="grid gap-2">
 					<div>
-						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 ORIG</div>
-						@FieldLabel("Locality Name (orig)", "")
-						<input type="text" name="orig_locality_name" placeholder="e.g. CHICAGO" maxlength="30" class="font-mono"/>
+						@FieldLabel("Address Line 1", "")
+						<input type="text" name="emp_addr1" placeholder="123 MAIN ST" maxlength="40"/>
 					</div>
 					<div>
-						<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 CORR</div>
-						@FieldLabel("Locality Name (corr)", "")
-						<input type="text" name="corr_locality_name" placeholder="e.g. CHICAGO" maxlength="30" class="font-mono"/>
+						@FieldLabel("Address Line 2", "")
+						<input type="text" name="emp_addr2" placeholder="APT 4B" maxlength="40"/>
+					</div>
+					<div class="grid grid-cols-[2fr_1fr_1fr] gap-2">
+						<div>
+							@FieldLabel("City", "")
+							<input type="text" name="emp_city" placeholder="SPRINGFIELD" maxlength="39"/>
+						</div>
+						<div>
+							@FieldLabel("State", "")
+							<input type="text" name="emp_state" placeholder="IL" maxlength="2" class="font-mono"/>
+						</div>
+						<div>
+							@FieldLabel("ZIP", "")
+							<input type="text" name="emp_zip" placeholder="62701" maxlength="5" class="font-mono"/>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<div class="mt-4 flex justify-end">
-				<button type="submit" class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent">
-					ADD EMPLOYEE +
-				</button>
-			</div>
-		</form>
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Wages & Social Security", "Boxes 1, 3, 5, 7")
+				<div class="grid gap-2">
+					@amountRow("BOX 1 ORIG", "Wages/Tips/Other (orig)", "orig_wages", "BOX 1 CORR", "Wages/Tips/Other (corr)", "corr_wages")
+					@amountRow("BOX 3 ORIG", "SS Wages (orig)", "orig_ss_wages", "BOX 3 CORR", "SS Wages (corr)", "corr_ss_wages")
+					@amountRow("BOX 5 ORIG", "Medicare Wages (orig)", "orig_med_wages", "BOX 5 CORR", "Medicare Wages (corr)", "corr_med_wages")
+					@amountRow("BOX 7 ORIG", "SS Tips (orig)", "orig_ss_tips", "BOX 7 CORR", "SS Tips (corr)", "corr_ss_tips")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Tax Withholdings", "Boxes 2, 4, 6")
+				<div class="grid gap-2">
+					@amountRow("BOX 2 ORIG", "Fed Income Tax (orig)", "orig_fed_tax", "BOX 2 CORR", "Fed Income Tax (corr)", "corr_fed_tax")
+					@amountRow("BOX 4 ORIG", "SS Tax (orig)", "orig_ss_tax", "BOX 4 CORR", "SS Tax (corr)", "corr_ss_tax")
+					@amountRow("BOX 6 ORIG", "Medicare Tax (orig)", "orig_med_tax", "BOX 6 CORR", "Medicare Tax (corr)", "corr_med_tax")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Box 8 — Allocated Tips", "RCO record")
+				<div class="grid gap-2">
+					@amountRow("BOX 8 ORIG", "Allocated Tips (orig)", "orig_alloc_tips", "BOX 8 CORR", "Allocated Tips (corr)", "corr_alloc_tips")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Box 10 — Dependent Care Benefits", "")
+				<div class="grid gap-2">
+					@amountRow("BOX 10 ORIG", "Dependent Care (orig)", "orig_dep_care", "BOX 10 CORR", "Dependent Care (corr)", "corr_dep_care")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Box 11 — Nonqualified Plans", "two separate EFW2C positions")
+				<div class="grid gap-2">
+					@amountRow("BOX 11 §457 ORIG", "Section 457 (orig)", "orig_nonqual_457", "BOX 11 §457 CORR", "Section 457 (corr)", "corr_nonqual_457")
+					@amountRow("BOX 11 NON-457 ORIG", "Non-Sec 457 (orig)", "orig_nonqual_not457", "BOX 11 NON-457 CORR", "Non-Sec 457 (corr)", "corr_nonqual_not457")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Box 12 — Elective Deferrals & Other Codes", "leave blank if not correcting")
+				<div class="grid gap-2">
+					@amountRow("CODE D ORIG", "401(k) Deferrals (orig)", "orig_code_d", "CODE D CORR", "401(k) Deferrals (corr)", "corr_code_d")
+					@amountRow("CODE E ORIG", "403(b) Deferrals (orig)", "orig_code_e", "CODE E CORR", "403(b) Deferrals (corr)", "corr_code_e")
+					@amountRow("CODE G ORIG", "Govt 457(b) Deferrals (orig)", "orig_code_g", "CODE G CORR", "Govt 457(b) Deferrals (corr)", "corr_code_g")
+					@amountRow("CODE W ORIG", "Employer HSA Contrib (orig)", "orig_code_w", "CODE W CORR", "Employer HSA Contrib (corr)", "corr_code_w")
+					@amountRow("CODE AA ORIG", "Roth 401(k) (orig)", "orig_code_aa", "CODE AA CORR", "Roth 401(k) (corr)", "corr_code_aa")
+					@amountRow("CODE BB ORIG", "Roth 403(b) (orig)", "orig_code_bb", "CODE BB CORR", "Roth 403(b) (corr)", "corr_code_bb")
+					@amountRow("CODE DD ORIG", "Employer Health Cost (orig)", "orig_code_dd", "CODE DD CORR", "Employer Health Cost (corr)", "corr_code_dd")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Box 13 — Checkboxes", "select orig + corr only when correcting; leave '— no correction —' otherwise")
+				<div class="grid gap-3">
+					@box13Row("Statutory Employee", "orig_statutory_emp", "corr_statutory_emp", "", "")
+					@box13Row("Retirement Plan", "orig_retirement_plan", "corr_retirement_plan", "", "")
+					@box13Row("Third-Party Sick Pay", "orig_third_party_sick", "corr_third_party_sick", "", "")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("State Correction", "Boxes 15–17")
+				<div class="grid gap-2">
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 ORIG</div>
+							@FieldLabel("State (orig)", "")
+							<input type="text" name="orig_state_code" placeholder="IL" maxlength="2" class="font-mono"/>
+						</div>
+						<div>
+							<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 15 CORR</div>
+							@FieldLabel("State (corr)", "")
+							<input type="text" name="corr_state_code" placeholder="IL" maxlength="2" class="font-mono"/>
+						</div>
+					</div>
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							@FieldLabel("Employer State ID (orig)", "")
+							<input type="text" name="orig_state_id" placeholder="State ID number" maxlength="20" class="font-mono"/>
+						</div>
+						<div>
+							@FieldLabel("Employer State ID (corr)", "")
+							<input type="text" name="corr_state_id" placeholder="State ID number" maxlength="20" class="font-mono"/>
+						</div>
+					</div>
+					@amountRow("BOX 16 ORIG", "State Wages (orig)", "orig_state_wages", "BOX 16 CORR", "State Wages (corr)", "corr_state_wages")
+					@amountRow("BOX 17 ORIG", "State Income Tax (orig)", "orig_state_tax", "BOX 17 CORR", "State Income Tax (corr)", "corr_state_tax")
+				</div>
+
+				<hr class="border-0 border-t-2 border-ink my-5"/>
+
+				@SectionHeader("Locality Correction", "Boxes 18–20")
+				<div class="grid gap-2">
+					@amountRow("BOX 18 ORIG", "Local Wages (orig)", "orig_local_wages", "BOX 18 CORR", "Local Wages (corr)", "corr_local_wages")
+					@amountRow("BOX 19 ORIG", "Local Income Tax (orig)", "orig_local_tax", "BOX 19 CORR", "Local Income Tax (corr)", "corr_local_tax")
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 ORIG</div>
+							@FieldLabel("Locality Name (orig)", "")
+							<input type="text" name="orig_locality_name" placeholder="e.g. CHICAGO" maxlength="30" class="font-mono"/>
+						</div>
+						<div>
+							<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">BOX 20 CORR</div>
+							@FieldLabel("Locality Name (corr)", "")
+							<input type="text" name="corr_locality_name" placeholder="e.g. CHICAGO" maxlength="30" class="font-mono"/>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-4 flex justify-end">
+					<button type="submit" class="font-mono font-semibold text-[0.8rem] tracking-[0.08em] px-[18px] py-2 border-2 cursor-pointer transition-all duration-150 uppercase bg-ink text-white border-ink hover:bg-accent hover:border-accent">
+						ADD EMPLOYEE +
+					</button>
+				</div>
+			</form>
+		</div>
 	</div>
 }
 
@@ -162,6 +244,31 @@ templ amountRow(origBox, origLabel, origName, corrBox, corrLabel, corrName strin
 			<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">{ corrBox }</div>
 			@FieldLabel(corrLabel, "")
 			<input type="number" name={ corrName } step="0.01" min="0" placeholder="0.00" class="font-mono"/>
+		</div>
+	</div>
+}
+
+// box13Row renders a Box 13 checkbox correction row: label + orig select + corr select.
+templ box13Row(label, origName, corrName, origVal, corrVal string) {
+	<div>
+		@FieldLabel(label, "")
+		<div class="grid grid-cols-2 gap-2 mt-0.5">
+			<div>
+				<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">ORIG VALUE</div>
+				<select name={ origName }>
+					<option value="" selected?={ origVal == "" }>— no correction —</option>
+					<option value="1" selected?={ origVal == "1" }>✓ Checked</option>
+					<option value="0" selected?={ origVal == "0" }>☐ Unchecked</option>
+				</select>
+			</div>
+			<div>
+				<div class="font-mono text-[0.6rem] font-semibold text-muted px-1 py-0.5 bg-ledger inline-block mb-0.5">CORR VALUE</div>
+				<select name={ corrName }>
+					<option value="" selected?={ corrVal == "" }>— no correction —</option>
+					<option value="1" selected?={ corrVal == "1" }>✓ Checked</option>
+					<option value="0" selected?={ corrVal == "0" }>☐ Unchecked</option>
+				</select>
+			</div>
 		</div>
 	</div>
 }

@@ -36,8 +36,8 @@ templ SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) {
 				</div>
 				<div class="grid grid-cols-2 gap-2">
 					<div>
-						@FieldLabel("Contact Phone *", "(digits only)")
-						<input type="tel" name="contact_phone" value={ s.Submitter.ContactPhone } required maxlength="15" class="font-mono"/>
+						@FieldLabel("Contact Phone *", "(800) 555-1234")
+						<input type="tel" name="contact_phone" value={ formatPhone(s.Submitter.ContactPhone) } required maxlength="16" class="font-mono"/>
 					</div>
 					<div>
 						@FieldLabel("Contact Email *", "")
@@ -54,7 +54,7 @@ templ SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) {
 				<div class="grid grid-cols-2 gap-2">
 					<div>
 						@FieldLabel("Employer EIN *", "")
-						<input type="text" name="ein" value={ s.Employer.EIN } required maxlength="10" class="font-mono"/>
+						<input type="text" name="ein" value={ formatEIN(s.Employer.EIN) } required maxlength="10" class="font-mono"/>
 					</div>
 					<div>
 						@FieldLabel("Tax Year *", "")
@@ -133,8 +133,8 @@ templ SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) {
 				</div>
 				<div class="grid grid-cols-2 gap-2">
 					<div>
-						@FieldLabel("Employer Contact Phone *", "(digits only)")
-						<input type="tel" name="employer_contact_phone" value={ s.Employer.ContactPhone } required maxlength="15" class="font-mono"/>
+						@FieldLabel("Employer Contact Phone *", "(800) 555-1234")
+						<input type="tel" name="employer_contact_phone" value={ formatPhone(s.Employer.ContactPhone) } required maxlength="16" class="font-mono"/>
 					</div>
 					<div>
 						@FieldLabel("Employer Contact Email *", "")

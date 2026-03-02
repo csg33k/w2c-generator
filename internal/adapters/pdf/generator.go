@@ -157,18 +157,28 @@ func drawEmployeePage(pdf *fpdf.Fpdf, s *domain.Submission, e *domain.EmployeeRe
 		{"Box 7 - Social Security Tips", e.Amounts.OriginalSocialSecurityTips, e.Amounts.CorrectSocialSecurityTips},
 	}
 
-	// Optional state/local rows - only include when non-zero
-	if e.Amounts.OriginalStateWages != 0 || e.Amounts.CorrectStateWages != 0 {
-		rows = append(rows, amtRow{"Box 16 - State Wages, Tips, etc.", e.Amounts.OriginalStateWages, e.Amounts.CorrectStateWages})
+	// Optional boxes — only included when at least one value is non-zero
+	optRows := []amtRow{
+		{"Box 8 - Allocated Tips", e.Amounts.OriginalAllocatedTips, e.Amounts.CorrectAllocatedTips},
+		{"Box 10 - Dependent Care Benefits", e.Amounts.OriginalDependentCare, e.Amounts.CorrectDependentCare},
+		{"Box 11 - Nonqual Plans (Sec 457)", e.Amounts.OriginalNonqualPlan457, e.Amounts.CorrectNonqualPlan457},
+		{"Box 11 - Nonqual Plans (Non-457)", e.Amounts.OriginalNonqualNotSection457, e.Amounts.CorrectNonqualNotSection457},
+		{"Box 12 Code D - 401(k) Deferrals", e.Amounts.OriginalCode401k, e.Amounts.CorrectCode401k},
+		{"Box 12 Code E - 403(b) Deferrals", e.Amounts.OriginalCode403b, e.Amounts.CorrectCode403b},
+		{"Box 12 Code G - Govt 457(b) Deferrals", e.Amounts.OriginalCode457bGovt, e.Amounts.CorrectCode457bGovt},
+		{"Box 12 Code W - Employer HSA Contrib", e.Amounts.OriginalCodeW_HSA, e.Amounts.CorrectCodeW_HSA},
+		{"Box 12 Code AA - Roth 401(k)", e.Amounts.OriginalCodeAA_Roth401k, e.Amounts.CorrectCodeAA_Roth401k},
+		{"Box 12 Code BB - Roth 403(b)", e.Amounts.OriginalCodeBB_Roth403b, e.Amounts.CorrectCodeBB_Roth403b},
+		{"Box 12 Code DD - Employer Health Coverage", e.Amounts.OriginalCodeDD_EmpHealth, e.Amounts.CorrectCodeDD_EmpHealth},
+		{"Box 16 - State Wages, Tips, etc.", e.Amounts.OriginalStateWages, e.Amounts.CorrectStateWages},
+		{"Box 17 - State Income Tax", e.Amounts.OriginalStateIncomeTax, e.Amounts.CorrectStateIncomeTax},
+		{"Box 18 - Local Wages, Tips, etc.", e.Amounts.OriginalLocalWages, e.Amounts.CorrectLocalWages},
+		{"Box 19 - Local Income Tax", e.Amounts.OriginalLocalIncomeTax, e.Amounts.CorrectLocalIncomeTax},
 	}
-	if e.Amounts.OriginalStateIncomeTax != 0 || e.Amounts.CorrectStateIncomeTax != 0 {
-		rows = append(rows, amtRow{"Box 17 - State Income Tax", e.Amounts.OriginalStateIncomeTax, e.Amounts.CorrectStateIncomeTax})
-	}
-	if e.Amounts.OriginalLocalWages != 0 || e.Amounts.CorrectLocalWages != 0 {
-		rows = append(rows, amtRow{"Box 18 - Local Wages, Tips, etc.", e.Amounts.OriginalLocalWages, e.Amounts.CorrectLocalWages})
-	}
-	if e.Amounts.OriginalLocalIncomeTax != 0 || e.Amounts.CorrectLocalIncomeTax != 0 {
-		rows = append(rows, amtRow{"Box 19 - Local Income Tax", e.Amounts.OriginalLocalIncomeTax, e.Amounts.CorrectLocalIncomeTax})
+	for _, r := range optRows {
+		if r.orig != 0 || r.corr != 0 {
+			rows = append(rows, r)
+		}
 	}
 
 	rowH := 6.5
@@ -203,6 +213,71 @@ func drawEmployeePage(pdf *fpdf.Fpdf, s *domain.Submission, e *domain.EmployeeRe
 			}
 		}
 		y += rowH
+	}
+
+	// ── Name corrections block ────────────────────────────────────────────────
+	if e.OriginalFirstName != "" || e.OriginalLastName != "" {
+		y += 5
+		pdf.SetFillColor(240, 240, 240)
+		pdf.SetFont("Helvetica", "B", 8)
+		pdf.SetXY(marginL, y)
+		pdf.CellFormat(contentW, 5.5, "NAME CORRECTION", "LRT", 1, "L", true, 0, "")
+		y += 5.5
+		pdf.SetFont("Helvetica", "", 8.5)
+		origName := strings.TrimSpace(e.OriginalLastName + ", " + e.OriginalFirstName + " " + e.OriginalMiddleName)
+		corrName := strings.TrimSpace(e.LastName + ", " + e.FirstName + " " + e.MiddleName)
+		pdf.SetXY(marginL, y)
+		pdf.CellFormat(contentW/4, 5.5, "Was:", "L", 0, "L", false, 0, "")
+		pdf.CellFormat(contentW*3/4, 5.5, origName, "R", 1, "L", false, 0, "")
+		y += 5.5
+		pdf.SetXY(marginL, y)
+		pdf.CellFormat(contentW/4, 5.5, "Now:", "L", 0, "L", false, 0, "")
+		pdf.CellFormat(contentW*3/4, 5.5, corrName, "R", 1, "L", false, 0, "")
+		y += 5.5
+		pdf.SetXY(marginL, y)
+		pdf.CellFormat(contentW, 0, "", "LB", 1, "L", false, 0, "")
+	}
+
+	// ── Box 13 checkbox corrections ───────────────────────────────────────────
+	hasBox13 := e.Box13.OrigStatutoryEmployee != nil || e.Box13.OrigRetirementPlan != nil || e.Box13.OrigThirdPartySickPay != nil
+	if hasBox13 {
+		y += 5
+		pdf.SetFillColor(240, 240, 240)
+		pdf.SetFont("Helvetica", "B", 8)
+		pdf.SetXY(marginL, y)
+		pdf.CellFormat(contentW, 5.5, "BOX 13 - CHECKBOX CORRECTIONS", "LRT", 1, "L", true, 0, "")
+		y += 5.5
+		pdf.SetFont("Helvetica", "", 8.5)
+		box13Rows := []struct {
+			label string
+			orig  *bool
+			corr  *bool
+		}{
+			{"Statutory Employee", e.Box13.OrigStatutoryEmployee, e.Box13.CorrectStatutoryEmployee},
+			{"Retirement Plan", e.Box13.OrigRetirementPlan, e.Box13.CorrectRetirementPlan},
+			{"Third-Party Sick Pay", e.Box13.OrigThirdPartySickPay, e.Box13.CorrectThirdPartySickPay},
+		}
+		boolStr := func(b *bool) string {
+			if b == nil {
+				return "—"
+			}
+			if *b {
+				return "✓ Checked"
+			}
+			return "☐ Unchecked"
+		}
+		for _, br := range box13Rows {
+			if br.orig == nil {
+				continue
+			}
+			pdf.SetXY(marginL, y)
+			pdf.CellFormat(contentW/3, 5.5, br.label+":", "L", 0, "L", false, 0, "")
+			pdf.CellFormat(contentW/3, 5.5, boolStr(br.orig), "", 0, "C", false, 0, "")
+			pdf.CellFormat(contentW/3, 5.5, "->  "+boolStr(br.corr), "R", 1, "L", false, 0, "")
+			y += 5.5
+		}
+		pdf.SetXY(marginL, y)
+		pdf.CellFormat(contentW, 0, "", "LB", 1, "L", false, 0, "")
 	}
 
 	// ── State / Locality block (Box 15 & 20) ─────────────────────────────────

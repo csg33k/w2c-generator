@@ -83,6 +83,39 @@ templ EmployeeCard(e domain.EmployeeRecord, subID int64) {
 			@amountCell("BOX 5 — MED WAGES",  e.Amounts.OriginalMedicareWages,           e.Amounts.CorrectMedicareWages)
 			@amountCell("BOX 6 — MED TAX",    e.Amounts.OriginalMedicareTax,             e.Amounts.CorrectMedicareTax)
 			@amountCell("BOX 7 — SS TIPS",    e.Amounts.OriginalSocialSecurityTips,      e.Amounts.CorrectSocialSecurityTips)
+			if e.Amounts.OriginalAllocatedTips != 0 || e.Amounts.CorrectAllocatedTips != 0 {
+				@amountCell("BOX 8 — ALLOC TIPS", e.Amounts.OriginalAllocatedTips, e.Amounts.CorrectAllocatedTips)
+			}
+			if e.Amounts.OriginalDependentCare != 0 || e.Amounts.CorrectDependentCare != 0 {
+				@amountCell("BOX 10 — DEP CARE", e.Amounts.OriginalDependentCare, e.Amounts.CorrectDependentCare)
+			}
+			if e.Amounts.OriginalNonqualPlan457 != 0 || e.Amounts.CorrectNonqualPlan457 != 0 {
+				@amountCell("BOX 11 §457", e.Amounts.OriginalNonqualPlan457, e.Amounts.CorrectNonqualPlan457)
+			}
+			if e.Amounts.OriginalNonqualNotSection457 != 0 || e.Amounts.CorrectNonqualNotSection457 != 0 {
+				@amountCell("BOX 11 NON-457", e.Amounts.OriginalNonqualNotSection457, e.Amounts.CorrectNonqualNotSection457)
+			}
+			if e.Amounts.OriginalCode401k != 0 || e.Amounts.CorrectCode401k != 0 {
+				@amountCell("BOX 12 CODE D", e.Amounts.OriginalCode401k, e.Amounts.CorrectCode401k)
+			}
+			if e.Amounts.OriginalCode403b != 0 || e.Amounts.CorrectCode403b != 0 {
+				@amountCell("BOX 12 CODE E", e.Amounts.OriginalCode403b, e.Amounts.CorrectCode403b)
+			}
+			if e.Amounts.OriginalCode457bGovt != 0 || e.Amounts.CorrectCode457bGovt != 0 {
+				@amountCell("BOX 12 CODE G", e.Amounts.OriginalCode457bGovt, e.Amounts.CorrectCode457bGovt)
+			}
+			if e.Amounts.OriginalCodeW_HSA != 0 || e.Amounts.CorrectCodeW_HSA != 0 {
+				@amountCell("BOX 12 CODE W", e.Amounts.OriginalCodeW_HSA, e.Amounts.CorrectCodeW_HSA)
+			}
+			if e.Amounts.OriginalCodeAA_Roth401k != 0 || e.Amounts.CorrectCodeAA_Roth401k != 0 {
+				@amountCell("BOX 12 CODE AA", e.Amounts.OriginalCodeAA_Roth401k, e.Amounts.CorrectCodeAA_Roth401k)
+			}
+			if e.Amounts.OriginalCodeBB_Roth403b != 0 || e.Amounts.CorrectCodeBB_Roth403b != 0 {
+				@amountCell("BOX 12 CODE BB", e.Amounts.OriginalCodeBB_Roth403b, e.Amounts.CorrectCodeBB_Roth403b)
+			}
+			if e.Amounts.OriginalCodeDD_EmpHealth != 0 || e.Amounts.CorrectCodeDD_EmpHealth != 0 {
+				@amountCell("BOX 12 CODE DD", e.Amounts.OriginalCodeDD_EmpHealth, e.Amounts.CorrectCodeDD_EmpHealth)
+			}
 			if e.Amounts.OriginalStateWages != 0 || e.Amounts.CorrectStateWages != 0 {
 				@amountCell("BOX 16 — STATE WAGES", e.Amounts.OriginalStateWages, e.Amounts.CorrectStateWages)
 			}
@@ -96,6 +129,11 @@ templ EmployeeCard(e domain.EmployeeRecord, subID int64) {
 				@amountCell("BOX 19 — LOCAL TAX", e.Amounts.OriginalLocalIncomeTax, e.Amounts.CorrectLocalIncomeTax)
 			}
 		</div>
+		if e.OriginalFirstName != "" || e.OriginalLastName != "" {
+			<div class="mt-2 text-[0.7rem] text-muted font-mono">
+				Name correction: { e.OriginalFirstName } { e.OriginalLastName } → { e.FirstName } { e.LastName }
+			</div>
+		}
 		if e.CorrectStateCode != "" || e.OriginalStateCode != "" || e.CorrectLocalityName != "" || e.OriginalLocalityName != "" {
 			<div class="mt-2 text-[0.7rem] text-muted font-mono">
 				if e.OriginalStateCode != "" || e.CorrectStateCode != "" {
@@ -106,6 +144,20 @@ templ EmployeeCard(e domain.EmployeeRecord, subID int64) {
 				}
 				if e.OriginalLocalityName != "" || e.CorrectLocalityName != "" {
 					· Locality: { e.OriginalLocalityName } → { e.CorrectLocalityName }
+				}
+			</div>
+		}
+		if e.Box13.OrigStatutoryEmployee != nil || e.Box13.OrigRetirementPlan != nil || e.Box13.OrigThirdPartySickPay != nil {
+			<div class="mt-2 text-[0.7rem] text-muted font-mono">
+				Box 13 corrections:
+				if e.Box13.OrigStatutoryEmployee != nil {
+					Statutory Emp
+				}
+				if e.Box13.OrigRetirementPlan != nil {
+					· Retirement Plan
+				}
+				if e.Box13.OrigThirdPartySickPay != nil {
+					· 3rd-Party Sick
 				}
 			</div>
 		}

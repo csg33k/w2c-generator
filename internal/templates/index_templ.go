@@ -91,11 +91,11 @@ func Index(submissions []domain.Submission, taxYears []domain.TaxYearInfo) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = FieldLabel("Contact Phone *", "(digits only)").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FieldLabel("Contact Phone *", "(800) 555-1234").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<input type=\"tel\" name=\"contact_phone\" placeholder=\"8005551234\" required maxlength=\"15\" class=\"font-mono\"></div><div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<input type=\"tel\" name=\"contact_phone\" placeholder=\"(800) 555-1234\" required maxlength=\"16\" class=\"font-mono\"></div><div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -293,11 +293,11 @@ func Index(submissions []domain.Submission, taxYears []domain.TaxYearInfo) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = FieldLabel("Employer Contact Phone *", "(digits only)").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FieldLabel("Employer Contact Phone *", "(800) 555-1234").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<input type=\"tel\" name=\"employer_contact_phone\" placeholder=\"8005551234\" required maxlength=\"15\" class=\"font-mono\"></div><div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<input type=\"tel\" name=\"employer_contact_phone\" placeholder=\"(800) 555-1234\" required maxlength=\"16\" class=\"font-mono\"></div><div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -398,9 +398,9 @@ func SubmissionList(submissions []domain.Submission) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var10 string
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.EIN)
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(formatEIN(s.Employer.EIN))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 182, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/index.templ`, Line: 182, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {

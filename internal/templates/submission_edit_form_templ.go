@@ -165,7 +165,7 @@ func SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = FieldLabel("Contact Phone *", "(digits only)").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = FieldLabel("Contact Phone *", "(800) 555-1234").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -174,15 +174,15 @@ func SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) tem
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(s.Submitter.ContactPhone)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(formatPhone(s.Submitter.ContactPhone))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/submission_edit_form.templ`, Line: 40, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/submission_edit_form.templ`, Line: 40, Col: 90}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" required maxlength=\"15\" class=\"font-mono\"></div><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" required maxlength=\"16\" class=\"font-mono\"></div><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -224,9 +224,9 @@ func SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) tem
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.EIN)
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(formatEIN(s.Employer.EIN))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/submission_edit_form.templ`, Line: 57, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/submission_edit_form.templ`, Line: 57, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -617,7 +617,7 @@ func SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = FieldLabel("Employer Contact Phone *", "(digits only)").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = FieldLabel("Employer Contact Phone *", "(800) 555-1234").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -626,15 +626,15 @@ func SubmissionEditForm(s *domain.Submission, taxYears []domain.TaxYearInfo) tem
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(s.Employer.ContactPhone)
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(formatPhone(s.Employer.ContactPhone))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/submission_edit_form.templ`, Line: 137, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/submission_edit_form.templ`, Line: 137, Col: 98}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "\" required maxlength=\"15\" class=\"font-mono\"></div><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "\" required maxlength=\"16\" class=\"font-mono\"></div><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

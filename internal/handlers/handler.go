@@ -214,50 +214,7 @@ func (h *Handler) addEmployee(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	e := &domain.EmployeeRecord{
-		SSN:                   stripDashes(r.FormValue("ssn")),
-		OriginalSSN:           stripDashes(r.FormValue("original_ssn")),
-		FirstName:             r.FormValue("first_name"),
-		MiddleName:            r.FormValue("middle_name"),
-		LastName:              r.FormValue("last_name"),
-		Suffix:                r.FormValue("suffix"),
-		AddressLine1:          r.FormValue("emp_addr1"),
-		AddressLine2:          r.FormValue("emp_addr2"),
-		City:                  r.FormValue("emp_city"),
-		State:                 r.FormValue("emp_state"),
-		ZIP:                   r.FormValue("emp_zip"),
-		ZIPExtension:          r.FormValue("emp_zip_ext"),
-		OriginalStateCode:     strings.ToUpper(strings.TrimSpace(r.FormValue("orig_state_code"))),
-		CorrectStateCode:      strings.ToUpper(strings.TrimSpace(r.FormValue("corr_state_code"))),
-		OriginalStateIDNumber: r.FormValue("orig_state_id"),
-		CorrectStateIDNumber:  r.FormValue("corr_state_id"),
-		OriginalLocalityName:  r.FormValue("orig_locality_name"),
-		CorrectLocalityName:   r.FormValue("corr_locality_name"),
-		Amounts: domain.MonetaryAmounts{
-			OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
-			CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
-			OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
-			CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
-			OriginalSocialSecurityWages: parseCents(r.FormValue("orig_ss_wages")),
-			CorrectSocialSecurityWages:  parseCents(r.FormValue("corr_ss_wages")),
-			OriginalMedicareWages:       parseCents(r.FormValue("orig_med_wages")),
-			CorrectMedicareWages:        parseCents(r.FormValue("corr_med_wages")),
-			OriginalFederalIncomeTax:    parseCents(r.FormValue("orig_fed_tax")),
-			CorrectFederalIncomeTax:     parseCents(r.FormValue("corr_fed_tax")),
-			OriginalSocialSecurityTax:   parseCents(r.FormValue("orig_ss_tax")),
-			CorrectSocialSecurityTax:    parseCents(r.FormValue("corr_ss_tax")),
-			OriginalMedicareTax:         parseCents(r.FormValue("orig_med_tax")),
-			CorrectMedicareTax:          parseCents(r.FormValue("corr_med_tax")),
-			OriginalStateWages:          parseCents(r.FormValue("orig_state_wages")),
-			CorrectStateWages:           parseCents(r.FormValue("corr_state_wages")),
-			OriginalStateIncomeTax:      parseCents(r.FormValue("orig_state_tax")),
-			CorrectStateIncomeTax:       parseCents(r.FormValue("corr_state_tax")),
-			OriginalLocalWages:          parseCents(r.FormValue("orig_local_wages")),
-			CorrectLocalWages:           parseCents(r.FormValue("corr_local_wages")),
-			OriginalLocalIncomeTax:      parseCents(r.FormValue("orig_local_tax")),
-			CorrectLocalIncomeTax:       parseCents(r.FormValue("corr_local_tax")),
-		},
-	}
+	e := parseEmployeeForm(r)
 	if err := h.repo.AddEmployee(r.Context(), subID, e); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -311,59 +268,120 @@ func (h *Handler) updateEmployee(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	// Fetch first so we preserve SubmissionID, CreatedAt, etc.
-	e, err := h.repo.GetEmployee(r.Context(), id)
+	// Fetch first to preserve SubmissionID and CreatedAt.
+	existing, err := h.repo.GetEmployee(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	e.SSN = stripDashes(r.FormValue("ssn"))
-	e.OriginalSSN = stripDashes(r.FormValue("original_ssn"))
-	e.FirstName = r.FormValue("first_name")
-	e.MiddleName = r.FormValue("middle_name")
-	e.LastName = r.FormValue("last_name")
-	e.Suffix = r.FormValue("suffix")
-	e.AddressLine1 = r.FormValue("emp_addr1")
-	e.AddressLine2 = r.FormValue("emp_addr2")
-	e.City = r.FormValue("emp_city")
-	e.State = r.FormValue("emp_state")
-	e.ZIP = r.FormValue("emp_zip")
-	e.ZIPExtension = r.FormValue("emp_zip_ext")
-	e.OriginalStateCode = strings.ToUpper(strings.TrimSpace(r.FormValue("orig_state_code")))
-	e.CorrectStateCode = strings.ToUpper(strings.TrimSpace(r.FormValue("corr_state_code")))
-	e.OriginalStateIDNumber = r.FormValue("orig_state_id")
-	e.CorrectStateIDNumber = r.FormValue("corr_state_id")
-	e.OriginalLocalityName = r.FormValue("orig_locality_name")
-	e.CorrectLocalityName = r.FormValue("corr_locality_name")
-	e.Amounts = domain.MonetaryAmounts{
-		OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
-		CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
-		OriginalSocialSecurityWages: parseCents(r.FormValue("orig_ss_wages")),
-		CorrectSocialSecurityWages:  parseCents(r.FormValue("corr_ss_wages")),
-		OriginalMedicareWages:       parseCents(r.FormValue("orig_med_wages")),
-		CorrectMedicareWages:        parseCents(r.FormValue("corr_med_wages")),
-		OriginalFederalIncomeTax:    parseCents(r.FormValue("orig_fed_tax")),
-		CorrectFederalIncomeTax:     parseCents(r.FormValue("corr_fed_tax")),
-		OriginalSocialSecurityTax:   parseCents(r.FormValue("orig_ss_tax")),
-		CorrectSocialSecurityTax:    parseCents(r.FormValue("corr_ss_tax")),
-		OriginalMedicareTax:         parseCents(r.FormValue("orig_med_tax")),
-		CorrectMedicareTax:          parseCents(r.FormValue("corr_med_tax")),
-		OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
-		CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
-		OriginalStateWages:          parseCents(r.FormValue("orig_state_wages")),
-		CorrectStateWages:           parseCents(r.FormValue("corr_state_wages")),
-		OriginalStateIncomeTax:      parseCents(r.FormValue("orig_state_tax")),
-		CorrectStateIncomeTax:       parseCents(r.FormValue("corr_state_tax")),
-		OriginalLocalWages:          parseCents(r.FormValue("orig_local_wages")),
-		CorrectLocalWages:           parseCents(r.FormValue("corr_local_wages")),
-		OriginalLocalIncomeTax:      parseCents(r.FormValue("orig_local_tax")),
-		CorrectLocalIncomeTax:       parseCents(r.FormValue("corr_local_tax")),
-	}
+	e := parseEmployeeForm(r)
+	e.ID = existing.ID
+	e.SubmissionID = existing.SubmissionID
+	e.CreatedAt = existing.CreatedAt
 	if err := h.repo.UpdateEmployee(r.Context(), e); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 	render(w, r, templates.EmployeeCard(*e, e.SubmissionID))
+}
+
+// parseEmployeeForm reads all employee correction fields from an HTTP form request
+// and returns a populated EmployeeRecord.  ID, SubmissionID, and CreatedAt are
+// zero-valued and must be filled in by the caller.
+func parseEmployeeForm(r *http.Request) *domain.EmployeeRecord {
+	parseBoolPtr := func(name string) *bool {
+		v := r.FormValue(name)
+		if v == "" {
+			return nil
+		}
+		b := v == "1"
+		return &b
+	}
+	return &domain.EmployeeRecord{
+		SSN:         stripDashes(r.FormValue("ssn")),
+		OriginalSSN: stripDashes(r.FormValue("original_ssn")),
+		FirstName:   r.FormValue("first_name"),
+		MiddleName:  r.FormValue("middle_name"),
+		LastName:    r.FormValue("last_name"),
+		Suffix:      r.FormValue("suffix"),
+		// Name correction fields (only populated when correcting a previously wrong name)
+		OriginalFirstName:  r.FormValue("orig_first_name"),
+		OriginalMiddleName: r.FormValue("orig_middle_name"),
+		OriginalLastName:   r.FormValue("orig_last_name"),
+		OriginalSuffix:     r.FormValue("orig_suffix"),
+		AddressLine1: r.FormValue("emp_addr1"),
+		AddressLine2: r.FormValue("emp_addr2"),
+		City:         r.FormValue("emp_city"),
+		State:        r.FormValue("emp_state"),
+		ZIP:          r.FormValue("emp_zip"),
+		ZIPExtension: r.FormValue("emp_zip_ext"),
+		OriginalStateCode:     strings.ToUpper(strings.TrimSpace(r.FormValue("orig_state_code"))),
+		CorrectStateCode:      strings.ToUpper(strings.TrimSpace(r.FormValue("corr_state_code"))),
+		OriginalStateIDNumber: r.FormValue("orig_state_id"),
+		CorrectStateIDNumber:  r.FormValue("corr_state_id"),
+		OriginalLocalityName:  r.FormValue("orig_locality_name"),
+		CorrectLocalityName:   r.FormValue("corr_locality_name"),
+		Amounts: domain.MonetaryAmounts{
+			// Boxes 1–7
+			OriginalWagesTipsOther:      parseCents(r.FormValue("orig_wages")),
+			CorrectWagesTipsOther:       parseCents(r.FormValue("corr_wages")),
+			OriginalFederalIncomeTax:    parseCents(r.FormValue("orig_fed_tax")),
+			CorrectFederalIncomeTax:     parseCents(r.FormValue("corr_fed_tax")),
+			OriginalSocialSecurityWages: parseCents(r.FormValue("orig_ss_wages")),
+			CorrectSocialSecurityWages:  parseCents(r.FormValue("corr_ss_wages")),
+			OriginalSocialSecurityTax:   parseCents(r.FormValue("orig_ss_tax")),
+			CorrectSocialSecurityTax:    parseCents(r.FormValue("corr_ss_tax")),
+			OriginalMedicareWages:       parseCents(r.FormValue("orig_med_wages")),
+			CorrectMedicareWages:        parseCents(r.FormValue("corr_med_wages")),
+			OriginalMedicareTax:         parseCents(r.FormValue("orig_med_tax")),
+			CorrectMedicareTax:          parseCents(r.FormValue("corr_med_tax")),
+			OriginalSocialSecurityTips:  parseCents(r.FormValue("orig_ss_tips")),
+			CorrectSocialSecurityTips:   parseCents(r.FormValue("corr_ss_tips")),
+			// Box 8 — Allocated Tips
+			OriginalAllocatedTips: parseCents(r.FormValue("orig_alloc_tips")),
+			CorrectAllocatedTips:  parseCents(r.FormValue("corr_alloc_tips")),
+			// Box 10 — Dependent Care Benefits
+			OriginalDependentCare: parseCents(r.FormValue("orig_dep_care")),
+			CorrectDependentCare:  parseCents(r.FormValue("corr_dep_care")),
+			// Box 11 — Nonqualified Plans
+			OriginalNonqualPlan457:       parseCents(r.FormValue("orig_nonqual_457")),
+			CorrectNonqualPlan457:        parseCents(r.FormValue("corr_nonqual_457")),
+			OriginalNonqualNotSection457: parseCents(r.FormValue("orig_nonqual_not457")),
+			CorrectNonqualNotSection457:  parseCents(r.FormValue("corr_nonqual_not457")),
+			// Box 12 codes
+			OriginalCode401k:         parseCents(r.FormValue("orig_code_d")),
+			CorrectCode401k:          parseCents(r.FormValue("corr_code_d")),
+			OriginalCode403b:         parseCents(r.FormValue("orig_code_e")),
+			CorrectCode403b:          parseCents(r.FormValue("corr_code_e")),
+			OriginalCode457bGovt:     parseCents(r.FormValue("orig_code_g")),
+			CorrectCode457bGovt:      parseCents(r.FormValue("corr_code_g")),
+			OriginalCodeW_HSA:        parseCents(r.FormValue("orig_code_w")),
+			CorrectCodeW_HSA:         parseCents(r.FormValue("corr_code_w")),
+			OriginalCodeAA_Roth401k:  parseCents(r.FormValue("orig_code_aa")),
+			CorrectCodeAA_Roth401k:   parseCents(r.FormValue("corr_code_aa")),
+			OriginalCodeBB_Roth403b:  parseCents(r.FormValue("orig_code_bb")),
+			CorrectCodeBB_Roth403b:   parseCents(r.FormValue("corr_code_bb")),
+			OriginalCodeDD_EmpHealth: parseCents(r.FormValue("orig_code_dd")),
+			CorrectCodeDD_EmpHealth:  parseCents(r.FormValue("corr_code_dd")),
+			// Boxes 16–19 — State / Local
+			OriginalStateWages:     parseCents(r.FormValue("orig_state_wages")),
+			CorrectStateWages:      parseCents(r.FormValue("corr_state_wages")),
+			OriginalStateIncomeTax: parseCents(r.FormValue("orig_state_tax")),
+			CorrectStateIncomeTax:  parseCents(r.FormValue("corr_state_tax")),
+			OriginalLocalWages:     parseCents(r.FormValue("orig_local_wages")),
+			CorrectLocalWages:      parseCents(r.FormValue("corr_local_wages")),
+			OriginalLocalIncomeTax: parseCents(r.FormValue("orig_local_tax")),
+			CorrectLocalIncomeTax:  parseCents(r.FormValue("corr_local_tax")),
+		},
+		Box13: domain.Box13Flags{
+			OrigStatutoryEmployee:    parseBoolPtr("orig_statutory_emp"),
+			CorrectStatutoryEmployee: parseBoolPtr("corr_statutory_emp"),
+			OrigRetirementPlan:       parseBoolPtr("orig_retirement_plan"),
+			CorrectRetirementPlan:    parseBoolPtr("corr_retirement_plan"),
+			OrigThirdPartySickPay:    parseBoolPtr("orig_third_party_sick"),
+			CorrectThirdPartySickPay: parseBoolPtr("corr_third_party_sick"),
+		},
+	}
 }
 
 func (h *Handler) deleteEmployee(w http.ResponseWriter, r *http.Request) {
